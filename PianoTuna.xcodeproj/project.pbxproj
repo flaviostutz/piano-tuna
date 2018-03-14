@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		7C4CE7EA20560C8500A2CB65 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EF70091C1C3ED07100E75ECF /* LaunchScreen.storyboard */; };
+		7C51A76220587324006A9E1D /* BaseTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C51A76120587324006A9E1D /* BaseTabBarController.swift */; };
+		7C51A76420589194006A9E1D /* CircularArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C51A76320589194006A9E1D /* CircularArray.swift */; };
+		7CB9237F20585D5B0078486E /* Tests.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7CB9237E20585D5B0078486E /* Tests.storyboard */; };
+		7CD8D2EB2058B7EE008F95A1 /* FFTPitchAnalyser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CD8D2EA2058B7EE008F95A1 /* FFTPitchAnalyser.swift */; };
 		EF7009141C3ED07100E75ECF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7009131C3ED07100E75ECF /* AppDelegate.swift */; };
 		EF7009161C3ED07100E75ECF /* SpectralViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7009151C3ED07100E75ECF /* SpectralViewController.swift */; };
 		EF7009191C3ED07100E75ECF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EF7009171C3ED07100E75ECF /* Main.storyboard */; };
@@ -20,9 +24,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		7C51A76120587324006A9E1D /* BaseTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseTabBarController.swift; sourceTree = "<group>"; };
+		7C51A76320589194006A9E1D /* CircularArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularArray.swift; sourceTree = "<group>"; };
+		7CB9237E20585D5B0078486E /* Tests.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Tests.storyboard; sourceTree = "<group>"; };
+		7CD8D2EA2058B7EE008F95A1 /* FFTPitchAnalyser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFTPitchAnalyser.swift; sourceTree = "<group>"; };
 		EF7009101C3ED07100E75ECF /* PianoTuna.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PianoTuna.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EF7009131C3ED07100E75ECF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		EF7009151C3ED07100E75ECF /* SpectralViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectralViewController.swift; sourceTree = "<group>"; };
+		EF7009151C3ED07100E75ECF /* SpectralViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectralViewController.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		EF7009181C3ED07100E75ECF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		EF70091A1C3ED07100E75ECF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EF70091D1C3ED07100E75ECF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -45,6 +53,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7CD8D2EC2058C98E008F95A1 /* fft */ = {
+			isa = PBXGroup;
+			children = (
+				7CD8D2EA2058B7EE008F95A1 /* FFTPitchAnalyser.swift */,
+				EFAC3F471C45C719002CD63F /* TempiFFT.swift */,
+			);
+			path = fft;
+			sourceTree = "<group>";
+		};
+		7CD8D2ED2058C9CA008F95A1 /* utils */ = {
+			isa = PBXGroup;
+			children = (
+				EFAC3F4D1C4D7B76002CD63F /* TempiDebug.swift */,
+				EFAC3F451C406DC5002CD63F /* TempiUtilities.swift */,
+				EF7009291C3EDFB900E75ECF /* TempiAudioInput.swift */,
+				7C51A76320589194006A9E1D /* CircularArray.swift */,
+			);
+			path = utils;
+			sourceTree = "<group>";
+		};
 		EF7009071C3ED07100E75ECF = {
 			isa = PBXGroup;
 			children = (
@@ -64,17 +92,17 @@
 		EF7009121C3ED07100E75ECF /* PianoTuna */ = {
 			isa = PBXGroup;
 			children = (
+				7CD8D2ED2058C9CA008F95A1 /* utils */,
+				7CD8D2EC2058C98E008F95A1 /* fft */,
 				EF7009131C3ED07100E75ECF /* AppDelegate.swift */,
 				EF7009151C3ED07100E75ECF /* SpectralViewController.swift */,
-				EF7009291C3EDFB900E75ECF /* TempiAudioInput.swift */,
 				EF7916BD1C50AA9700658A2C /* SpectralView.swift */,
-				EFAC3F471C45C719002CD63F /* TempiFFT.swift */,
-				EFAC3F451C406DC5002CD63F /* TempiUtilities.swift */,
-				EFAC3F4D1C4D7B76002CD63F /* TempiDebug.swift */,
 				EF7009171C3ED07100E75ECF /* Main.storyboard */,
 				EF70091A1C3ED07100E75ECF /* Assets.xcassets */,
 				EF70091C1C3ED07100E75ECF /* LaunchScreen.storyboard */,
 				EF70091F1C3ED07100E75ECF /* Info.plist */,
+				7CB9237E20585D5B0078486E /* Tests.storyboard */,
+				7C51A76120587324006A9E1D /* BaseTabBarController.swift */,
 			);
 			path = PianoTuna;
 			sourceTree = "<group>";
@@ -141,6 +169,7 @@
 			files = (
 				7C4CE7EA20560C8500A2CB65 /* LaunchScreen.storyboard in Resources */,
 				EF70091B1C3ED07100E75ECF /* Assets.xcassets in Resources */,
+				7CB9237F20585D5B0078486E /* Tests.storyboard in Resources */,
 				EF7009191C3ED07100E75ECF /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -152,7 +181,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7C51A76220587324006A9E1D /* BaseTabBarController.swift in Sources */,
+				7C51A76420589194006A9E1D /* CircularArray.swift in Sources */,
 				EF7916BE1C50AA9700658A2C /* SpectralView.swift in Sources */,
+				7CD8D2EB2058B7EE008F95A1 /* FFTPitchAnalyser.swift in Sources */,
 				EFAC3F4E1C4D7B76002CD63F /* TempiDebug.swift in Sources */,
 				EF7009161C3ED07100E75ECF /* SpectralViewController.swift in Sources */,
 				EF70092A1C3EDFB900E75ECF /* TempiAudioInput.swift in Sources */,

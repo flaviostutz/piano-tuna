@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="lgo-4R-mri">
+    <device id="retina5_5" orientation="landscape">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Analysis-->
+        <scene sceneID="t5q-Ee-dy2">
+            <objects>
+                <viewController id="zOL-E8-0hL" customClass="SpectralViewController" customModule="PianoTuna" customModuleProvider="target" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Analysis" id="k3l-E7-rkf"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="9NF-Fe-iFy" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="517.66304347826087" y="556.52173913043487"/>
+        </scene>
+        <!--Tuner-->
+        <scene sceneID="Vvd-sr-kBv">
+            <objects>
+                <viewController id="JdM-50-ufd" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="c30-ut-wbZ">
+                        <rect key="frame" x="0.0" y="0.0" width="736" height="414"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <viewLayoutGuide key="safeArea" id="pOu-tq-LbA"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Tuner" id="Hjg-3L-1wO"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="6gu-yw-Rcf" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="517.66304347826087" y="-249.27536231884059"/>
+        </scene>
+        <!--Base Tab Bar Controller-->
+        <scene sceneID="GUj-tc-1Av">
+            <objects>
+                <tabBarController id="lgo-4R-mri" customClass="BaseTabBarController" customModule="PianoTuna" customModuleProvider="target" sceneMemberID="viewController">
+                    <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="zdh-74-bf4">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="49"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    </tabBar>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="number" keyPath="defaultIndex">
+                            <integer key="value" value="1"/>
+                        </userDefinedRuntimeAttribute>
+                    </userDefinedRuntimeAttributes>
+                    <connections>
+                        <segue destination="JdM-50-ufd" kind="relationship" relationship="viewControllers" id="hnt-wH-VsR"/>
+                        <segue destination="zOL-E8-0hL" kind="relationship" relationship="viewControllers" id="0kL-DB-H5m"/>
+                    </connections>
+                </tabBarController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="jxu-C3-l9f" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-226" y="135"/>
+        </scene>
+    </scenes>
+</document>
