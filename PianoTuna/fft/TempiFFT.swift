@@ -367,7 +367,7 @@ import Accelerate
         return self.magnitudes
     }
     
-    func spectrumFreqAtIndex(index:Int) -> Float {
+    func spectrumFreqAtIndex(_ index:Int) -> Float {
         return self.bandwidth * Float(index)
     }
 

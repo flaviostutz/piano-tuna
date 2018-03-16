@@ -14,7 +14,7 @@
 		7C56300F205BEE74003111CF /* FFTSpectrumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C56300E205BEE74003111CF /* FFTSpectrumView.swift */; };
 		7CB9237F20585D5B0078486E /* Tests.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7CB9237E20585D5B0078486E /* Tests.storyboard */; };
 		7CD8D2EB2058B7EE008F95A1 /* FFTPitchAnalyser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CD8D2EA2058B7EE008F95A1 /* FFTPitchAnalyser.swift */; };
-		7CD8D2F1205BBF31008F95A1 /* SpectrumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CD8D2F0205BBF31008F95A1 /* SpectrumView.swift */; };
+		7CD8D2F1205BBF31008F95A1 /* HistogramView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CD8D2F0205BBF31008F95A1 /* HistogramView.swift */; };
 		EF7009141C3ED07100E75ECF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7009131C3ED07100E75ECF /* AppDelegate.swift */; };
 		EF7009161C3ED07100E75ECF /* SpectralViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7009151C3ED07100E75ECF /* SpectralViewController.swift */; };
 		EF7009191C3ED07100E75ECF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EF7009171C3ED07100E75ECF /* Main.storyboard */; };
@@ -33,7 +33,7 @@
 		7C56300E205BEE74003111CF /* FFTSpectrumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFTSpectrumView.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		7CB9237E20585D5B0078486E /* Tests.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Tests.storyboard; sourceTree = "<group>"; };
 		7CD8D2EA2058B7EE008F95A1 /* FFTPitchAnalyser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFTPitchAnalyser.swift; sourceTree = "<group>"; wrapsLines = 0; };
-		7CD8D2F0205BBF31008F95A1 /* SpectrumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumView.swift; sourceTree = "<group>"; wrapsLines = 0; };
+		7CD8D2F0205BBF31008F95A1 /* HistogramView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistogramView.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		EF7009101C3ED07100E75ECF /* PianoTuna.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PianoTuna.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EF7009131C3ED07100E75ECF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		EF7009151C3ED07100E75ECF /* SpectralViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectralViewController.swift; sourceTree = "<group>"; wrapsLines = 0; };
@@ -109,7 +109,7 @@
 				EF70091F1C3ED07100E75ECF /* Info.plist */,
 				7CB9237E20585D5B0078486E /* Tests.storyboard */,
 				7C51A76120587324006A9E1D /* BaseTabBarController.swift */,
-				7CD8D2F0205BBF31008F95A1 /* SpectrumView.swift */,
+				7CD8D2F0205BBF31008F95A1 /* HistogramView.swift */,
 				7C56300C205BE839003111CF /* VerticalLayoutView.swift */,
 				7C56300E205BEE74003111CF /* FFTSpectrumView.swift */,
 			);
@@ -193,7 +193,7 @@
 				7C51A76220587324006A9E1D /* BaseTabBarController.swift in Sources */,
 				7C51A76420589194006A9E1D /* CircularArray.swift in Sources */,
 				EF7916BE1C50AA9700658A2C /* SpectralView.swift in Sources */,
-				7CD8D2F1205BBF31008F95A1 /* SpectrumView.swift in Sources */,
+				7CD8D2F1205BBF31008F95A1 /* HistogramView.swift in Sources */,
 				7CD8D2EB2058B7EE008F95A1 /* FFTPitchAnalyser.swift in Sources */,
 				EFAC3F4E1C4D7B76002CD63F /* TempiDebug.swift in Sources */,
 				7C56300F205BEE74003111CF /* FFTSpectrumView.swift in Sources */,

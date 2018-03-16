@@ -30,7 +30,7 @@ class FFTPitchAnalyser {
         for mag in spectrum {
             
             //climbing peak
-            if mag>=currentPeakMag && mag>minMagnitude && self.fft.spectrumFreqAtIndex(index: spectrumIndex)>=cutoutFreq {
+            if mag>=currentPeakMag && mag>minMagnitude && self.fft.spectrumFreqAtIndex(spectrumIndex)>=cutoutFreq {
                 currentPeakMag = mag
                 
             //just after the peak
@@ -58,7 +58,7 @@ class FFTPitchAnalyser {
                     let freqDiff = (indexDiff * self.fft.bandwidth)
 //                    print(freqDiff)
                     
-                    let peakFreq = self.fft.spectrumFreqAtIndex(index: spectrumIndex-1) + freqDiff
+                    let peakFreq = self.fft.spectrumFreqAtIndex(spectrumIndex-1) + freqDiff
 
                     peakFreqs.append((frequency:peakFreq, magnitude:currentPeakMag))
                 }

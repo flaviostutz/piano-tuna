@@ -1,5 +1,5 @@
 //
-//  SpectrumView.swift
+//  dataView.swift
 //  PianoTuna
 //
 //  Created by Flavio de Oliveira Stutz on 3/16/18.
@@ -9,10 +9,10 @@
 import Foundation
 import UIKit
 
-//This view shows a spectrum graph along with labels and custom geometries along both axis
-class SpectrumView: UIView {
+//This view shows a data graph along with labels and custom geometries along both axis
+class HistogramView: UIView {
 
-    var spectrum: [Float]! {
+    var data: [Float]! {
         didSet {
             self.setNeedsDisplay()
         }
@@ -23,48 +23,70 @@ class SpectrumView: UIView {
     var maxX: Int!
 
     var labels: [String]!
-    var labelFontSize: Float = 11.0
+    var labelFontSize: Float = 11.0 {
+        didSet {
+            prepareFonts()
+        }
+    }
     var labelFont: UIFont!
-
+    
+    var annotations: [(text:String,x:Float,y:Float)]!
+    var annotationsFontSize: Float = 11.0 {
+        didSet {
+            prepareFonts()
+        }
+    }
+    var annotationsFont: UIFont!
+    
     var title: String!
-    var titleFontSize: Float = 14.0
+    var titleFontSize: Float = 14.0 {
+        didSet {
+            prepareFonts()
+        }
+    }
     var titleFont: UIFont!
     
     var xAxisLabels: [String]!
-    var xAxisLabelsFontSize: Float = 10.0
+    var xAxisLabelsFontSize: Float = 10.0 {
+        didSet {
+            prepareFonts()
+        }
+    }
     var xAxisLabelsFont: UIFont!
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        labelFont = UIFont.systemFont(ofSize: CGFloat(labelFontSize), weight: UIFontWeightRegular)
-        titleFont = UIFont.systemFont(ofSize: CGFloat(titleFontSize), weight: UIFontWeightRegular)
-        xAxisLabelsFont = UIFont.systemFont(ofSize: CGFloat(xAxisLabelsFontSize), weight: UIFontWeightRegular)
+        prepareFonts()
     }
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     
+    private func prepareFonts() {
+        labelFont = UIFont.systemFont(ofSize: CGFloat(labelFontSize), weight: UIFontWeightRegular)
+        titleFont = UIFont.systemFont(ofSize: CGFloat(titleFontSize), weight: UIFontWeightRegular)
+        xAxisLabelsFont = UIFont.systemFont(ofSize: CGFloat(xAxisLabelsFontSize), weight: UIFontWeightRegular)
+        annotationsFont = UIFont.systemFont(ofSize: CGFloat(annotationsFontSize), weight: UIFontWeightRegular)
+    }
+    
     override func draw(_ rect: CGRect) {
-        if self.spectrum == nil {
+        if self.data == nil {
             return
         }
         
         let context = UIGraphicsGetCurrentContext()
 
-        self.drawTitle(context: context!)
-        if self.spectrum.count > 0 {
-            self.drawSpectrum(context: context!)
+        if self.data.count > 0 {
+            self.drawdata(context: context!)
             self.drawLabels(context: context!)
             self.drawXAxisLabels(context: context!)
+            self.drawAnnotations(context: context!)
         }
+        self.drawTitle(context: context!)
     }
 
-    private func drawSpectrum(context: CGContext) {
-        if spectrum == nil {
-            return
-        }
-
+    private func drawdata(context: CGContext) {
         let viewWidth = self.bounds.size.width
         let viewHeight = self.bounds.size.height
 
@@ -93,32 +115,35 @@ class SpectrumView: UIView {
         
         //x axis
         let scale: CGFloat = UIScreen.main.scale
-        let maxXIndex = maxX ?? spectrum.count - 1
-        let minXIndex = minX ?? 0
-        let colWidth = Float(round((viewWidth / CGFloat((maxXIndex-minXIndex+1)) * scale) / scale))
+        let maxXIndex = self.maxX ?? self.data.count - 1
+        let minXIndex = self.minX ?? 0
+        let colWidth = Float((viewWidth / CGFloat((maxXIndex-minXIndex+1)) * scale / scale))
 
         //y axis
-        let minYValue = self.minY ?? spectrum.min() ?? 0
-        let maxYValue = self.maxY ?? spectrum.max() ?? 0
-
+        let minYValue = self.minY ?? self.data.min() ?? 0
+        let maxYValue = self.maxY ?? self.data.max() ?? 0
         let negativeMinOffset = CGFloat(minYValue/(maxYValue - minYValue)) * maxColHeight
 
         //draw bars
         for i in minXIndex...maxXIndex {
-            let magnitude = spectrum[i]
+            var magnitude = self.data[i]
+            magnitude = min(maxYValue, max(magnitude, minYValue))//clip upper and lower ranges
             let ratio = magnitude/(maxYValue - minYValue)
             let magnitudeHeight = CGFloat(ratio) * maxColHeight
-//            print("bar magnitude=\(magnitude) ratio=\(ratio) rectH=\(magnitudeHeight)")
             
             let colRect: CGRect = CGRect(x: CGFloat(colWidth*Float(i)), y: plotYStart - negativeMinOffset, width: CGFloat(colWidth), height: magnitudeHeight)
+            print("colRect \(colRect)")
             
-            let startPoint = CGPoint(x: viewWidth / 2, y: 0)
-            let endPoint = CGPoint(x: viewWidth / 2, y: viewHeight)
+            UIColor.red.set()
+            context.addRect(colRect)
+            context.drawPath(using: CGPathDrawingMode.fillStroke)
             
-            context.saveGState()
-            context.clip(to: colRect)
-            context.drawLinearGradient(gradient!, start: startPoint, end: endPoint, options: CGGradientDrawingOptions(rawValue: 0))
-            context.restoreGState()
+//            let startPoint = CGPoint(x: 0, y: 0)
+//            let endPoint = CGPoint(x: 0, y: maxColHeight)
+//            context.saveGState()
+//            context.clip(to: colRect)
+//            context.drawLinearGradient(gradient!, start: startPoint, end: endPoint, options: CGGradientDrawingOptions(rawValue: 0))
+//            context.restoreGState()
         }
     }
     
@@ -161,13 +186,13 @@ class SpectrumView: UIView {
         let scale: CGFloat = UIScreen.main.scale
         
         //x axis
-        let maxXIndex = maxX ?? spectrum.count - 1
+        let maxXIndex = maxX ?? self.data.count - 1
         let minXIndex = minX ?? 0
-        let colWidth = Float(round((viewWidth / CGFloat((maxXIndex-minXIndex+1))) * scale / scale))
+        let colWidth = Float((viewWidth / CGFloat((maxXIndex-minXIndex+1)) * scale / scale))
         
         //y axis
-        let minYValue = self.minY ?? spectrum.min() ?? 0
-        let maxYValue = self.maxY ?? spectrum.max() ?? 0
+        let minYValue = self.minY ?? self.data.min() ?? 0
+        let maxYValue = self.maxY ?? self.data.max() ?? 0
 
         var plotYStart: CGFloat = 0.0
         var plotYEnd: CGFloat = viewHeight
@@ -190,7 +215,7 @@ class SpectrumView: UIView {
             attrStr.addAttribute(NSForegroundColorAttributeName, value: UIColor.yellow, range: NSMakeRange(0, label.count))
             
             let x = CGFloat(colWidth*Float(i) + colWidth/2 - labelFontSize/2)
-            let ratio = spectrum[i]/(maxYValue - minYValue)
+            let ratio = self.data[i]/(maxYValue - minYValue)
             let labelY = CGFloat(ratio) * maxColHeight + CGFloat(labelFontSize) + 2 + plotYStart
             attrStr.draw(at: CGPoint(x: x, y: -labelY + negativeMinOffset))
         }
@@ -214,9 +239,9 @@ class SpectrumView: UIView {
         let scale: CGFloat = UIScreen.main.scale
         
         //x axis
-        let maxXIndex = maxX ?? spectrum.count - 1
+        let maxXIndex = maxX ?? self.data.count - 1
         let minXIndex = minX ?? 0
-        let colWidth = Float(round((viewWidth / CGFloat((maxXIndex-minXIndex+1))) * scale / scale))
+        let colWidth = Float((viewWidth / CGFloat((maxXIndex-minXIndex+1)) * scale / scale))
         
         for i in minXIndex...maxXIndex {
             if xAxisLabels.count<(i+1) {
@@ -231,12 +256,24 @@ class SpectrumView: UIView {
             attrStr.addAttribute(NSForegroundColorAttributeName, value: UIColor.yellow, range: NSMakeRange(0, label.count))
             
             let x = CGFloat(colWidth*Float(i) + colWidth/2 - xAxisLabelsFontSize/2)
-//            print("x \(x) label \(label) y \(-CGFloat(xAxisLabelsFontSize*1.2))")
             attrStr.draw(at: CGPoint(x: x, y: -CGFloat(xAxisLabelsFontSize*1.2)))
         }
         
     }
     
 
+    private func drawAnnotations(context: CGContext) {
+        if annotations == nil {
+            return
+        }
+        
+        for annotation in annotations {
+            let attrStr = NSMutableAttributedString(string: annotation.text)
+            attrStr.addAttribute(NSFontAttributeName, value: annotationsFont, range: NSMakeRange(0, annotation.text.count))
+            attrStr.addAttribute(NSForegroundColorAttributeName, value: UIColor.yellow, range: NSMakeRange(0, annotation.text.count))
+            attrStr.draw(at: CGPoint(x: CGFloat(annotation.x), y: CGFloat(annotation.y)))
+        }
+        
+    }
     
 }
