@@ -10,7 +10,11 @@ import UIKit
 
 class SpectralView: UIView {
 
-    var fft: TempiFFT!
+    var fft: TempiFFT! {
+        didSet {
+            self.setNeedsDisplay()
+        }
+    }
 
     override func draw(_ rect: CGRect) {
         
@@ -30,7 +34,7 @@ class SpectralView: UIView {
     }
 
     private func drawPeaks(context: CGContext) {
-        let fontSize: CGFloat = 15.0
+        let fontSize: CGFloat = 10.0
         let font = UIFont.systemFont(ofSize: fontSize, weight: UIFontWeightRegular)
         let viewWidth = self.bounds.size.width
         let viewHeight = self.bounds.size.height
@@ -40,20 +44,27 @@ class SpectralView: UIView {
         context.translateBy(x: 0, y: viewHeight)
 
         var fftPitchAnalyser = FFTPitchAnalyser(self.fft)
-        var peakFreqs = fftPitchAnalyser.detectFrequencyPeaks(minMagnitude:0.2)
-        
-        print(peakFreqs)
-        
-        let labelStrings: [String] = peakFreqs.map { (freq) -> String in
-            return String(freq)
+        var peakFreqs = fftPitchAnalyser.detectFrequencyPeaksFFT(minMagnitude:0.15)
+        var peakFundamentalFreqs = fftPitchAnalyser.detectFundamentalFrequencies()
+
+        if peakFundamentalFreqs.count>0 {
+            print(peakFundamentalFreqs.removeFirst())
         }
-        let labelValues: [CGFloat] = peakFreqs.map { (freq) -> CGFloat in
-            return CGFloat(freq)
+
+        let labelStrings: [String] = peakFreqs.map { (frequency: Float, magnitude: Float) -> String in
+            return String(frequency)
         }
-        
+        let labelValues: [CGFloat] = peakFreqs.map { (frequency: Float, magnitude: Float) -> CGFloat in
+            return CGFloat(frequency)
+        }
+        let magnitudeValues: [Float] = peakFreqs.map { (frequency: Float, magnitude: Float) -> Float in
+            return magnitude
+        }
+
         for i in 0..<labelStrings.count {
             let str = labelStrings[i]
             let freq = labelValues[i]
+            let mag = magnitudeValues[i]
             
             var attrStr = NSMutableAttributedString(string: str)
 
@@ -62,7 +73,18 @@ class SpectralView: UIView {
             attrStr.addAttribute(NSForegroundColorAttributeName, value: UIColor.yellow, range: NSMakeRange(0, str.characters.count))
             
             var x: CGFloat = freq / samplesPerPixel - fontSize / 2.0
-            attrStr.draw(at: CGPoint(x: x, y: -200))
+            
+            
+            //determine label placement based on magnitude
+            var magnitudeDB = TempiFFT.toDB(mag)
+            let maxDB: Float = 64.0
+            let minDB: Float = -32.0
+            let headroom = maxDB - minDB
+            magnitudeDB = max(0, magnitudeDB + abs(minDB))
+            let dbRatio = min(1.0, magnitudeDB / headroom)
+            let magnitudeNorm = CGFloat(dbRatio) * viewHeight
+            
+            attrStr.draw(at: CGPoint(x: x, y: -magnitudeNorm-50))
         }
         
         context.restoreGState()

@@ -16,9 +16,13 @@ class FFTPitchAnalyser {
         self.fft = fft
     }
 
-    func detectFrequencyPeaks(minMagnitude: Float) -> [Float] {
-        var peakFreqs = Array<Float>()
+    func detectFrequencyPeaksFFT(minMagnitude: Float=0.1, cutoutFreq: Float=50) -> [(frequency: Float, magnitude: Float)] {
         let spectrum = fft.spectrum()
+        return detectFrequencyPeaks(spectrum: spectrum, minMagnitude:minMagnitude, cutoutFreq:cutoutFreq)
+    }
+
+    private func detectFrequencyPeaks(spectrum: [Float], minMagnitude: Float=0.1, cutoutFreq: Float=50) -> [(frequency: Float, magnitude: Float)] {
+        var peakFreqs = Array<(frequency: Float, magnitude: Float)>()
         var lastMag: Float = 0
         var lastLastMag: Float = 0
         var currentPeakMag: Float = 0
@@ -26,7 +30,7 @@ class FFTPitchAnalyser {
         for mag in spectrum {
             
             //climbing peak
-            if mag>=currentPeakMag && mag>minMagnitude{
+            if mag>=currentPeakMag && mag>minMagnitude && self.fft.spectrumFreqAtIndex(index: spectrumIndex)>=cutoutFreq {
                 currentPeakMag = mag
                 
             //just after the peak
@@ -52,11 +56,11 @@ class FFTPitchAnalyser {
                     //Barycentric method
                     let indexDiff: Float = (peak3 - peak1) / (peak1 + peak2 + peak3)
                     let freqDiff = (indexDiff * self.fft.bandwidth)
-                    print(freqDiff)
+//                    print(freqDiff)
                     
                     let peakFreq = self.fft.spectrumFreqAtIndex(index: spectrumIndex-1) + freqDiff
 
-                    peakFreqs.append(peakFreq)
+                    peakFreqs.append((frequency:peakFreq, magnitude:currentPeakMag))
                 }
                 
                 currentPeakMag = 0
@@ -71,8 +75,28 @@ class FFTPitchAnalyser {
         return peakFreqs
     }
     
-    func detectFundamentalFrequencies(minHarmonics:Int) -> [Float] {
-        return [3.2,32.0]
+    func detectFundamentalFrequencies(harmonics: Int=3, minMagnitude: Float=1) -> [(frequency: Float, magnitude: Float)] {
+        //using Harmonic Product Spectrum (HPS) for now
+        //more at https://cnx.org/contents/i5AAkZCP@2/Pitch-Detection-Algorithms
+
+        let minIndex = 20
+
+        var spectrum = fft.spectrum()
+        let maxIndex = spectrum.count - 1
+        var maxHIndex = spectrum.count / harmonics
+        
+        if maxHIndex*harmonics > maxIndex {
+            maxHIndex = Int(Float(maxIndex/harmonics).rounded())
+        }
+        
+        for j in minIndex...maxHIndex {
+            for i in 1...harmonics {
+                spectrum[j] *= spectrum[j * i]
+            }
+        }
+        
+        let hpsPeaks = detectFrequencyPeaks(spectrum: spectrum, minMagnitude: minMagnitude)
+        return hpsPeaks
     }
 }
 

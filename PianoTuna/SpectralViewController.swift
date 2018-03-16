@@ -13,10 +13,12 @@ class SpectralViewController: UIViewController {
     
     var audioInput: TempiAudioInput!
     var spectralView: SpectralView!
-    
+    var spectrumView: SpectrumView!
+    var fftSpectrumView: FFTSpectrumView!
+
     //PARAMETERS
     var sampleRate: Float = 16000//piano max frequency is 8kHz
-    var circularBufferSize: Int = 1024
+    var circularBufferSize: Int = 2048
     
     var lastTimeStamp: Double = 0
     var lastTimeStampCircularBuffer: Double = 0
@@ -24,11 +26,37 @@ class SpectralViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let bounds = CGRect(origin:self.view.bounds.origin, size:CGSize(width:view.bounds.width, height:self.view.bounds.height - 50))
-        spectralView = SpectralView(frame: bounds)
-        spectralView.backgroundColor = UIColor.black
-        self.view.addSubview(spectralView)
+        self.spectralView = SpectralView(frame: CGRect(x:0,y:0,width:self.view.bounds.width,height:self.view.bounds.height/3-60))
+        self.spectralView.backgroundColor = UIColor.black
+
+        //draw spectrum
+        spectrumView = SpectrumView(frame: CGRect(x:0,y:0,width:self.view.bounds.width,height:self.view.bounds.height/3))
+        spectrumView.backgroundColor = UIColor.black
+        let s = [-20,30,20,40,100,-10]
+        spectrumView.spectrum = s.map({ (elem) -> Float in
+            return Float(elem)
+        })
+        spectrumView.labels = ["a","b","c","d"]
+        spectrumView.minY = -20
+        spectrumView.maxY = 100
+        spectrumView.title = "Testing this!"
+        spectrumView.xAxisLabels = ["100","","","200"]
+
         
+        //draw fft spectrum
+        self.fftSpectrumView = FFTSpectrumView(frame: CGRect(x:0,y:0,width:self.view.bounds.width,height:self.view.bounds.height/3))
+        self.fftSpectrumView.backgroundColor = UIColor.black
+        self.fftSpectrumView.title = "Raw spectrum"
+
+        //prepare main vertical layout
+        let verticalLayout = VerticalLayoutView(width:view.bounds.width)
+        verticalLayout.addSubview(spectralView)
+        verticalLayout.addSubview(spectrumView)
+        verticalLayout.addSubview(fftSpectrumView)
+        self.view.addSubview(verticalLayout)
+
+        
+        //initialize sound analysis
         var circularSamplesBuffer = CircularArray<Float>()
         
         let audioInputCallback: TempiAudioInputCallback = { (timeStamp, numberOfFrames, samples) -> Void in
@@ -73,7 +101,7 @@ class SpectralViewController: UIViewController {
 
         tempi_dispatch_main { () -> () in
             self.spectralView.fft = fft
-            self.spectralView.setNeedsDisplay()
+            self.fftSpectrumView.fft = fft
         }
     }
     
