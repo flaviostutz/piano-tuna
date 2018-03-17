@@ -89,9 +89,11 @@ class FFTSpectrumView: UIView {
             var magnitudeDB = FFTUtils.toDB(magnitude)
             magnitudeDB = max(0, magnitudeDB + abs(minDB))
             spectrum.append(magnitudeDB)
-            
+
+            //labels match
             if self.labelsFrequency != nil {
                 if labelsCounter<self.labelsFrequency.count {
+//                    print("labelsCounter \(labelsCounter) c \(self.labelsFrequency.count)")
                     let lf = self.labelsFrequency[labelsCounter]
                     if abs(lf.frequency-fft.frequencyAtIndex(i))<fft.bandwidth {
                         viewLabels.append(lf.text)
@@ -103,6 +105,8 @@ class FFTSpectrumView: UIView {
             }
         }
         self.histogramView.labels = viewLabels
+
+        self.histogramView.barColor = UIColor.green.cgColor
         
         //force background to repaint
         self.histogramView.backgroundColor = self.backgroundColor

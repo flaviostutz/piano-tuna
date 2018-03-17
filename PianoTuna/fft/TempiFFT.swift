@@ -168,7 +168,7 @@ import Accelerate
         vDSP_zvmags(&(self.complexBuffer!), 1, &self.magnitudes!, 1, UInt(self.halfSize))
         
         //show info
-        print("resolution: \(self.nyquistFrequency/Float(self.magnitudes.count))Hz per bin; nyquistFrequency:\(self.nyquistFrequency)Hz")
+        print("bins:\(magnitudes.count) binWidth:\(self.nyquistFrequency/Float(self.magnitudes.count))Hz; maxFrequency:\(self.nyquistFrequency)Hz")
         
         self.hasPerformedFFT = true
     }
@@ -213,7 +213,6 @@ import Accelerate
     
     /// Calculate the average magnitude of the frequency band bounded by lowFreq and highFreq, inclusive
     func averageMagnitude(lowFreq: Float, highFreq: Float) -> Float {
-        
         var curFreq = lowFreq
         var total: Float = 0
         var count: Int = 0
@@ -228,7 +227,6 @@ import Accelerate
     
     /// Sum magnitudes across bands bounded by lowFreq and highFreq, inclusive
     func sumMagnitudes(lowFreq: Float, highFreq: Float, useDB: Bool) -> Float {
-        
         var curFreq = lowFreq
         var total: Float = 0
         while curFreq <= highFreq {

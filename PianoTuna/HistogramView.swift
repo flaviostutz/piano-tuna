@@ -14,7 +14,6 @@ class HistogramView: UIView {
 
     var data: [Float]! {
         didSet {
-            //without this, the background doesn't get repainted at each update
             self.setNeedsDisplay()
         }
     }
@@ -22,6 +21,7 @@ class HistogramView: UIView {
     var maxY: Float!
     var minX: Int!
     var maxX: Int!
+    var barColor: CGColor!
 
     var labels: [String]!
     var labelFontSize: Float = 11.0 {
@@ -135,18 +135,20 @@ class HistogramView: UIView {
             let colRect: CGRect = CGRect(x: CGFloat(colWidth*Float(i)), y: plotYStart - negativeMinOffset, width: CGFloat(colWidth), height: magnitudeHeight)
 //            print("colRect \(colRect)")
 
-            //paint in plain colors
-//            UIColor.red.set()
-//            context.addRect(colRect)
-//            context.drawPath(using: CGPathDrawingMode.fillStroke)
-
-            //use a gradient
-            let startPoint = CGPoint(x: 0, y: 0)
-            let endPoint = CGPoint(x: 0, y: maxColHeight)
-            context.saveGState()
-            context.clip(to: colRect)
-            context.drawLinearGradient(gradient!, start: startPoint, end: endPoint, options: CGGradientDrawingOptions(rawValue: 0))
-            context.restoreGState()
+            if self.barColor != nil {
+                //paint in plain colors (less cpu usage!)
+                context.setFillColor(self.barColor)
+                context.addRect(colRect)
+                context.drawPath(using: CGPathDrawingMode.fill)
+            } else {
+                //default to gradient
+                let startPoint = CGPoint(x: 0, y: 0)
+                let endPoint = CGPoint(x: 0, y: maxColHeight)
+                context.saveGState()
+                context.clip(to: colRect)
+                context.drawLinearGradient(gradient!, start: startPoint, end: endPoint, options: CGGradientDrawingOptions(rawValue: 0))
+                context.restoreGState()
+            }
         }
     }
     

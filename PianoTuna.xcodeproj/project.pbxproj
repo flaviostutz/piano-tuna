@@ -22,7 +22,6 @@
 		EF7009191C3ED07100E75ECF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EF7009171C3ED07100E75ECF /* Main.storyboard */; };
 		EF70091B1C3ED07100E75ECF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EF70091A1C3ED07100E75ECF /* Assets.xcassets */; };
 		EF70092A1C3EDFB900E75ECF /* TempiAudioInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7009291C3EDFB900E75ECF /* TempiAudioInput.swift */; };
-		EF7916BE1C50AA9700658A2C /* SpectralView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7916BD1C50AA9700658A2C /* SpectralView.swift */; };
 		EFAC3F461C406DC5002CD63F /* TempiUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFAC3F451C406DC5002CD63F /* TempiUtilities.swift */; };
 		EFAC3F481C45C719002CD63F /* TempiFFT.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFAC3F471C45C719002CD63F /* TempiFFT.swift */; };
 		EFAC3F4E1C4D7B76002CD63F /* TempiDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFAC3F4D1C4D7B76002CD63F /* TempiDebug.swift */; };
@@ -46,9 +45,8 @@
 		EF70091D1C3ED07100E75ECF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		EF70091F1C3ED07100E75ECF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EF7009291C3EDFB900E75ECF /* TempiAudioInput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TempiAudioInput.swift; sourceTree = "<group>"; };
-		EF7916BD1C50AA9700658A2C /* SpectralView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpectralView.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		EFAC3F451C406DC5002CD63F /* TempiUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TempiUtilities.swift; sourceTree = "<group>"; };
-		EFAC3F471C45C719002CD63F /* TempiFFT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TempiFFT.swift; sourceTree = "<group>"; };
+		EFAC3F471C45C719002CD63F /* TempiFFT.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TempiFFT.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		EFAC3F4D1C4D7B76002CD63F /* TempiDebug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TempiDebug.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -108,7 +106,6 @@
 				7CD8D2EC2058C98E008F95A1 /* fft */,
 				EF7009131C3ED07100E75ECF /* AppDelegate.swift */,
 				EF7009151C3ED07100E75ECF /* SpectralViewController.swift */,
-				EF7916BD1C50AA9700658A2C /* SpectralView.swift */,
 				EF7009171C3ED07100E75ECF /* Main.storyboard */,
 				EF70091A1C3ED07100E75ECF /* Assets.xcassets */,
 				EF70091C1C3ED07100E75ECF /* LaunchScreen.storyboard */,
@@ -200,7 +197,6 @@
 				7C51A76420589194006A9E1D /* CircularArray.swift in Sources */,
 				7C563011205C8561003111CF /* FFTUtils.swift in Sources */,
 				7C563013205C9C38003111CF /* ScaledBandsFFT.swift in Sources */,
-				EF7916BE1C50AA9700658A2C /* SpectralView.swift in Sources */,
 				7CD8D2F1205BBF31008F95A1 /* HistogramView.swift in Sources */,
 				7CD8D2EB2058B7EE008F95A1 /* FFTPitchAnalyser.swift in Sources */,
 				EFAC3F4E1C4D7B76002CD63F /* TempiDebug.swift in Sources */,

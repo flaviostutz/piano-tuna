@@ -10,12 +10,21 @@ import Foundation
 
 class FFTPitchAnalyser {
 
-    static func detectFundamentalFrequenciesHPS(fft: TempiFFT, harmonics: Int=3, minMagnitude: Float=0.05) -> [(frequency: Float, magnitude: Float)] {
+    static func detectFundamentalFrequenciesHPS(fft: TempiFFT, harmonics: Int=3, minMagnitude: Float=1) -> [(frequency: Float, magnitude: Float)] {
         let hpsSpectrum = calculateHPSSpectrum(spectrum: fft.spectrum(), harmonics: harmonics)
         let hpsPeaks = FFTUtils.calculateFrequencyPeaks(spectrum: hpsSpectrum, binWidth: fft.bandwidth, minMagnitude: minMagnitude)
         return hpsPeaks
     }
 
+    static func calculateScoreForFundamentalFrequencyCandidate(frequency: Float, fft: TempiFFT) -> Float {
+        let harmonicsMask = FFTUtils.calculateHarmonicsMask(fundamentalFrequency: frequency, binCount: fft.magnitudes.count, binWidth: fft.bandwidth)
+        var score: Float = 0.0
+        for i in 0..<fft.magnitudes.count {
+            score += harmonicsMask[i] * fft.magnitudes[i]
+        }
+        return score
+    }
+    
     static func calculateHPSSpectrum(spectrum: [Float], harmonics: Int=3) -> [Float] {
         //using Harmonic Product Spectrum (HPS) for now
         //more at https://cnx.org/contents/i5AAkZCP@2/Pitch-Detection-Algorithms
