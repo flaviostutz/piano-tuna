@@ -14,6 +14,7 @@ class HistogramView: UIView {
 
     var data: [Float]! {
         didSet {
+            //without this, the background doesn't get repainted at each update
             self.setNeedsDisplay()
         }
     }
@@ -132,18 +133,20 @@ class HistogramView: UIView {
             let magnitudeHeight = CGFloat(ratio) * maxColHeight
             
             let colRect: CGRect = CGRect(x: CGFloat(colWidth*Float(i)), y: plotYStart - negativeMinOffset, width: CGFloat(colWidth), height: magnitudeHeight)
-            print("colRect \(colRect)")
-            
-            UIColor.red.set()
-            context.addRect(colRect)
-            context.drawPath(using: CGPathDrawingMode.fillStroke)
-            
-//            let startPoint = CGPoint(x: 0, y: 0)
-//            let endPoint = CGPoint(x: 0, y: maxColHeight)
-//            context.saveGState()
-//            context.clip(to: colRect)
-//            context.drawLinearGradient(gradient!, start: startPoint, end: endPoint, options: CGGradientDrawingOptions(rawValue: 0))
-//            context.restoreGState()
+//            print("colRect \(colRect)")
+
+            //paint in plain colors
+//            UIColor.red.set()
+//            context.addRect(colRect)
+//            context.drawPath(using: CGPathDrawingMode.fillStroke)
+
+            //use a gradient
+            let startPoint = CGPoint(x: 0, y: 0)
+            let endPoint = CGPoint(x: 0, y: maxColHeight)
+            context.saveGState()
+            context.clip(to: colRect)
+            context.drawLinearGradient(gradient!, start: startPoint, end: endPoint, options: CGGradientDrawingOptions(rawValue: 0))
+            context.restoreGState()
         }
     }
     
@@ -256,7 +259,7 @@ class HistogramView: UIView {
             attrStr.addAttribute(NSForegroundColorAttributeName, value: UIColor.yellow, range: NSMakeRange(0, label.count))
             
             let x = CGFloat(colWidth*Float(i) + colWidth/2 - xAxisLabelsFontSize/2)
-            attrStr.draw(at: CGPoint(x: x, y: -CGFloat(xAxisLabelsFontSize*1.2)))
+            attrStr.draw(at: CGPoint(x: x + CGFloat(xAxisLabelsFontSize*0.5), y: -CGFloat(xAxisLabelsFontSize*1.2)))
         }
         
     }

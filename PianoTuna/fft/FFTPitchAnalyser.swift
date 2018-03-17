@@ -10,80 +10,21 @@ import Foundation
 
 class FFTPitchAnalyser {
 
-    var fft: TempiFFT
-    
-    init(_ fft: TempiFFT) {
-        self.fft = fft
+    static func detectFundamentalFrequenciesHPS(fft: TempiFFT, harmonics: Int=3, minMagnitude: Float=0.05) -> [(frequency: Float, magnitude: Float)] {
+        let hpsSpectrum = calculateHPSSpectrum(spectrum: fft.spectrum(), harmonics: harmonics)
+        let hpsPeaks = FFTUtils.calculateFrequencyPeaks(spectrum: hpsSpectrum, binWidth: fft.bandwidth, minMagnitude: minMagnitude)
+        return hpsPeaks
     }
 
-    func detectFrequencyPeaksFFT(minMagnitude: Float=0.1, cutoutFreq: Float=50) -> [(frequency: Float, magnitude: Float)] {
-        let spectrum = fft.spectrum()
-        return detectFrequencyPeaks(spectrum: spectrum, minMagnitude:minMagnitude, cutoutFreq:cutoutFreq)
-    }
-
-    private func detectFrequencyPeaks(spectrum: [Float], minMagnitude: Float=0.1, cutoutFreq: Float=50) -> [(frequency: Float, magnitude: Float)] {
-        var peakFreqs = Array<(frequency: Float, magnitude: Float)>()
-        var lastMag: Float = 0
-        var lastLastMag: Float = 0
-        var currentPeakMag: Float = 0
-        var spectrumIndex = 0
-        for mag in spectrum {
-            
-            //climbing peak
-            if mag>=currentPeakMag && mag>minMagnitude && self.fft.spectrumFreqAtIndex(spectrumIndex)>=cutoutFreq {
-                currentPeakMag = mag
-                
-            //just after the peak
-            } else {
-                
-                if lastLastMag>0 && lastMag>0 && currentPeakMag>0 {
-                    
-                    //calculate best frequency fit between (possible) peak elements
-                    //see other methods at https://dspguru.com/dsp/howtos/how-to-interpolate-fft-peak/
-                    var peak1 = currentPeakMag
-                    //FIXME verify if when we have only two peaks, the accuracy gets OK with this strategy
-                    if abs(lastLastMag-currentPeakMag)/currentPeakMag < 0.5 {
-                        peak1 = lastLastMag
-                    }
-                    
-                    let peak2 = currentPeakMag
-
-                    var peak3 = currentPeakMag
-                    if abs(mag-currentPeakMag)/currentPeakMag < 0.5 {
-                        peak3 = mag
-                    }
-                    
-                    //Barycentric method
-                    let indexDiff: Float = (peak3 - peak1) / (peak1 + peak2 + peak3)
-                    let freqDiff = (indexDiff * self.fft.bandwidth)
-//                    print(freqDiff)
-                    
-                    let peakFreq = self.fft.spectrumFreqAtIndex(spectrumIndex-1) + freqDiff
-
-                    peakFreqs.append((frequency:peakFreq, magnitude:currentPeakMag))
-                }
-                
-                currentPeakMag = 0
-                lastLastMag = 0
-                lastMag = 0
-            }
-            
-            lastLastMag = lastMag
-            lastMag = mag
-            spectrumIndex = spectrumIndex+1
-        }
-        return peakFreqs
-    }
-    
-    func detectFundamentalFrequencies(harmonics: Int=3, minMagnitude: Float=1) -> [(frequency: Float, magnitude: Float)] {
+    static func calculateHPSSpectrum(spectrum: [Float], harmonics: Int=3) -> [Float] {
         //using Harmonic Product Spectrum (HPS) for now
         //more at https://cnx.org/contents/i5AAkZCP@2/Pitch-Detection-Algorithms
-
+        
         let minIndex = 20
-
-        var spectrum = fft.spectrum()
-        let maxIndex = spectrum.count - 1
-        var maxHIndex = spectrum.count / harmonics
+        
+        var spectrum0 = Array<Float>(spectrum)
+        let maxIndex = spectrum0.count - 1
+        var maxHIndex = spectrum0.count / harmonics
         
         if maxHIndex*harmonics > maxIndex {
             maxHIndex = Int(Float(maxIndex/harmonics).rounded())
@@ -91,13 +32,13 @@ class FFTPitchAnalyser {
         
         for j in minIndex...maxHIndex {
             for i in 1...harmonics {
-                spectrum[j] *= spectrum[j * i]
+                spectrum0[j] *= spectrum0[j * i]
             }
         }
         
-        let hpsPeaks = detectFrequencyPeaks(spectrum: spectrum, minMagnitude: minMagnitude)
-        return hpsPeaks
+        return spectrum0
     }
+
 }
 
 

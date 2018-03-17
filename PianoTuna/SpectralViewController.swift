@@ -12,9 +12,10 @@ import AVFoundation
 class SpectralViewController: UIViewController {
     
     var audioInput: TempiAudioInput!
-    var spectralView: SpectralView!
-    var histogramView:HistogramView!
+//    var spectralView: SpectralView!
+//    var histogramView: HistogramView!
     var fftSpectrumView: FFTSpectrumView!
+    var hpsSpectrumView: HistogramView!
 
     //PARAMETERS
     var sampleRate: Float = 16000//piano max frequency is 8kHz
@@ -26,40 +27,45 @@ class SpectralViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.spectralView = SpectralView(frame: CGRect(x:0,y:0,width:self.view.bounds.width,height:self.view.bounds.height/3-60))
-        self.spectralView.backgroundColor = UIColor.black
+//        self.spectralView = SpectralView(frame: CGRect(x:0,y:0,width:self.view.bounds.width,height:self.view.bounds.height/2-60))
+//        self.spectralView.backgroundColor = UIColor.black
 
         //draw spectrum
-        histogramView = HistogramView(frame: CGRect(x:0,y:0,width:self.view.bounds.width,height:self.view.bounds.height/3))
-        histogramView.backgroundColor = UIColor.black
-        let s = [-20,20,60,40,48,-10]
-        histogramView.data = s.map({ (elem) -> Float in
-            return Float(elem)
-        })
-        histogramView.labels = ["a","b","c","d"]
-        histogramView.minY = -32
-        histogramView.maxY = 64
-        histogramView.title = "Testing this!"
-        histogramView.xAxisLabels = ["100","","","200"]
-        histogramView.annotations = [("test1", 100, 100)]
-        histogramView.annotations = [("test2", 150, 30)]
+//        histogramView = HistogramView(frame: CGRect(x:0,y:0,width:self.view.bounds.width,height:self.view.bounds.height/3))
+//        histogramView.backgroundColor = UIColor.black
+//        let s = [-20,20,60,40,48,-10]
+//        histogramView.data = s.map({ (elem) -> Float in
+//            return Float(elem)
+//        })
+//        histogramView.labels = ["a","b","c","d"]
+//        histogramView.minY = -32
+//        histogramView.maxY = 64
+//        histogramView.title = "Testing this!"
+//        histogramView.xAxisLabels = ["100","","","200"]
+//        histogramView.annotations = [("test1", 100, 100)]
+//        histogramView.annotations = [("test2", 150, 30)]
 
         
         //draw fft spectrum
-        self.fftSpectrumView = FFTSpectrumView(frame: CGRect(x:0,y:0,width:self.view.bounds.width,height:self.view.bounds.height/3))
+        self.fftSpectrumView = FFTSpectrumView(frame: CGRect(x:0,y:0,width:self.view.bounds.width,height:self.view.bounds.height/2-20))
         self.fftSpectrumView.backgroundColor = UIColor.black
         self.fftSpectrumView.title = "Raw spectrum"
-//        self.fftSpectrumView.zoomMinDB = 
-//        self.fftSpectrumView.zoomMaxDB =
-//        self.fftSpectrumView.zoomFromFrequency = 100
-//        self.fftSpectrumView.zoomToFrequency = 400
-
+        //        self.fftSpectrumView.zoomMinDB =
+        //        self.fftSpectrumView.zoomMaxDB =
+        //        self.fftSpectrumView.zoomFromFrequency = 100
+        //        self.fftSpectrumView.zoomToFrequency = 400
         
+        
+        //draw hps spectrum
+        self.hpsSpectrumView = HistogramView(frame: CGRect(x:0,y:0,width:self.view.bounds.width,height:self.view.bounds.height/2-20))
+        self.hpsSpectrumView.backgroundColor = UIColor.black
+//        self.hpsSpectrumView.minX = 0
+//        self.hpsSpectrumView.maxX = 100
+
         //prepare main vertical layout
         let verticalLayout = VerticalLayoutView(width:view.bounds.width)
-        verticalLayout.addSubview(spectralView)
-        verticalLayout.addSubview(histogramView)
         verticalLayout.addSubview(fftSpectrumView)
+        verticalLayout.addSubview(hpsSpectrumView)
         self.view.addSubview(verticalLayout)
 
         
@@ -103,18 +109,20 @@ class SpectralViewController: UIViewController {
         // Interpolate the FFT data so there's one band per pixel.
         let screenWidth = UIScreen.main.bounds.size.width * UIScreen.main.scale
 //        fft.calculateLinearBands(minFrequency: 0, maxFrequency: fft.nyquistFrequency, numberOfBands: Int(screenWidth))
-//        print("numberOfBands=\(Int(screenWidth))")
-//        fft.calculateLinearBands(minFrequency: 0, maxFrequency: fft.nyquistFrequency, numberOfBands: Int(screenWidth))
-        fft.calculateLinearBands(minFrequency: 100, maxFrequency: 500, numberOfBands: 5)
 
+        let hpsSpectrum = FFTPitchAnalyser.calculateHPSSpectrum(spectrum: fft.spectrum())
+        let peakFundamentalFreqs = FFTPitchAnalyser.detectFundamentalFrequenciesHPS(fft: fft)
+        print(peakFundamentalFreqs)
+        
+        let viewLabels = peakFundamentalFreqs.map { (peak) -> (frequency: Float, text: String) in
+            return (frequency: peak.frequency, text: String(peak.frequency))
+        }
+        self.fftSpectrumView.labelsFrequency = viewLabels
+//        print(viewLabels)
+        
         tempi_dispatch_main { () -> () in
-            self.spectralView.fft = fft
             self.fftSpectrumView.fft = fft
-
-//            let s = [Int(arc4random_uniform(100)),Int(arc4random_uniform(100)),Int(arc4random_uniform(100)),Int(arc4random_uniform(100)),100,0,-100]
-//            self.histogramView.spectrum = s.map({ (elem) -> Float in
-//                return Float(elem)
-//            })
+            self.hpsSpectrumView.data = hpsSpectrum
         }
     }
     

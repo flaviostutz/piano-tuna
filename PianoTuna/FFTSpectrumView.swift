@@ -17,7 +17,12 @@ class FFTSpectrumView: UIView {
     var fft: TempiFFT! {
         didSet {
             prepareSpectrumView(fft)
-//            super.setNeedsDisplay()
+        }
+    }
+    
+    var labelsFrequency: [(frequency: Float, text: String)]! {
+        didSet {
+            prepareSpectrumView(fft)
         }
     }
     
@@ -42,36 +47,64 @@ class FFTSpectrumView: UIView {
         super.init(coder: aDecoder)
     }
     
-    private func prepareSpectrumView(_ fft: TempiFFT) {
+    private func prepareSpectrumView(_ fft: TempiFFT!) {
+        if(fft == nil) {
+            return
+        }
+        
         let maxDB = self.zoomMaxDB ?? 64.0
         let minDB = self.zoomMinDB ?? -32.0
         let minFreq = self.zoomFromFrequency ?? 0
         let maxFreq = self.zoomToFrequency ?? fft.nyquistFrequency
 
-        if self.zoomFromFrequency != nil || self.zoomToFrequency != nil {
-            for i in 0..<fft.numberOfBands {
-                if fft.spectrumFreqAtIndex(i) <= minFreq {
-                    self.histogramView.minX = i
-                } else if fft.spectrumFreqAtIndex(i) >= maxFreq {
-                    self.histogramView.maxX = i
-                    break
-                }
+        var xAxisLabels = Array<String>()
+        for i in 0..<fft.magnitudes.count {
+            let freq = fft.frequencyAtIndex(i)
+            
+            //zoom frequency
+            if freq <= minFreq {
+                self.histogramView.minX = i
+            } else if freq >= maxFreq {
+                self.histogramView.maxX = i
+                break
             }
+            
+            //x axis labels
+            let show = i%(Int((maxFreq-minFreq)/100))==0
+            xAxisLabels.append(show ? String(Int(freq)) : "")
         }
+        self.histogramView.xAxisLabels = xAxisLabels
 
         self.histogramView.minY = 0
         self.histogramView.maxY = maxDB - minDB
 
         var spectrum = Array<Float>()
         
-        for i in 0..<fft.numberOfBands {
-            let magnitude = fft.magnitudeAtBand(i)
+        var viewLabels = Array<String>()
+        var labelsCounter = 0
+
+        for i in 0..<fft.magnitudes.count {
+            let magnitude = fft.magnitudes[i]
             // Incoming magnitudes are linear, making it impossible to see very low or very high values. Decibels to the rescue!
-            var magnitudeDB = TempiFFT.toDB(magnitude)
+            var magnitudeDB = FFTUtils.toDB(magnitude)
             magnitudeDB = max(0, magnitudeDB + abs(minDB))
-//            print(magnitudeDB)
             spectrum.append(magnitudeDB)
+            
+            if self.labelsFrequency != nil {
+                if labelsCounter<self.labelsFrequency.count {
+                    let lf = self.labelsFrequency[labelsCounter]
+                    if abs(lf.frequency-fft.frequencyAtIndex(i))<fft.bandwidth {
+                        viewLabels.append(lf.text)
+                        labelsCounter = labelsCounter + 1
+                    } else {
+                        viewLabels.append("")
+                    }
+                }
+            }
         }
+        self.histogramView.labels = viewLabels
+        
+        //force background to repaint
         self.histogramView.backgroundColor = self.backgroundColor
         self.histogramView.data = spectrum
     }

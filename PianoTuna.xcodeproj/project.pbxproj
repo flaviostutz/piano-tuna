@@ -12,6 +12,8 @@
 		7C51A76420589194006A9E1D /* CircularArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C51A76320589194006A9E1D /* CircularArray.swift */; };
 		7C56300D205BE839003111CF /* VerticalLayoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C56300C205BE839003111CF /* VerticalLayoutView.swift */; };
 		7C56300F205BEE74003111CF /* FFTSpectrumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C56300E205BEE74003111CF /* FFTSpectrumView.swift */; };
+		7C563011205C8561003111CF /* FFTUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C563010205C8561003111CF /* FFTUtils.swift */; };
+		7C563013205C9C38003111CF /* ScaledBandsFFT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C563012205C9C38003111CF /* ScaledBandsFFT.swift */; };
 		7CB9237F20585D5B0078486E /* Tests.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7CB9237E20585D5B0078486E /* Tests.storyboard */; };
 		7CD8D2EB2058B7EE008F95A1 /* FFTPitchAnalyser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CD8D2EA2058B7EE008F95A1 /* FFTPitchAnalyser.swift */; };
 		7CD8D2F1205BBF31008F95A1 /* HistogramView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CD8D2F0205BBF31008F95A1 /* HistogramView.swift */; };
@@ -31,6 +33,8 @@
 		7C51A76320589194006A9E1D /* CircularArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularArray.swift; sourceTree = "<group>"; };
 		7C56300C205BE839003111CF /* VerticalLayoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalLayoutView.swift; sourceTree = "<group>"; };
 		7C56300E205BEE74003111CF /* FFTSpectrumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFTSpectrumView.swift; sourceTree = "<group>"; wrapsLines = 0; };
+		7C563010205C8561003111CF /* FFTUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFTUtils.swift; sourceTree = "<group>"; wrapsLines = 0; };
+		7C563012205C9C38003111CF /* ScaledBandsFFT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaledBandsFFT.swift; sourceTree = "<group>"; };
 		7CB9237E20585D5B0078486E /* Tests.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Tests.storyboard; sourceTree = "<group>"; };
 		7CD8D2EA2058B7EE008F95A1 /* FFTPitchAnalyser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFTPitchAnalyser.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		7CD8D2F0205BBF31008F95A1 /* HistogramView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistogramView.swift; sourceTree = "<group>"; wrapsLines = 0; };
@@ -64,6 +68,8 @@
 			children = (
 				7CD8D2EA2058B7EE008F95A1 /* FFTPitchAnalyser.swift */,
 				EFAC3F471C45C719002CD63F /* TempiFFT.swift */,
+				7C563010205C8561003111CF /* FFTUtils.swift */,
+				7C563012205C9C38003111CF /* ScaledBandsFFT.swift */,
 			);
 			path = fft;
 			sourceTree = "<group>";
@@ -192,6 +198,8 @@
 			files = (
 				7C51A76220587324006A9E1D /* BaseTabBarController.swift in Sources */,
 				7C51A76420589194006A9E1D /* CircularArray.swift in Sources */,
+				7C563011205C8561003111CF /* FFTUtils.swift in Sources */,
+				7C563013205C9C38003111CF /* ScaledBandsFFT.swift in Sources */,
 				EF7916BE1C50AA9700658A2C /* SpectralView.swift in Sources */,
 				7CD8D2F1205BBF31008F95A1 /* HistogramView.swift in Sources */,
 				7CD8D2EB2058B7EE008F95A1 /* FFTPitchAnalyser.swift in Sources */,
