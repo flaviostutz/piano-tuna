@@ -8,12 +8,27 @@
 
 import Foundation
 
-class FFTPitchAnalyser {
+class PitchAnalyser {
 
-    static func detectFundamentalFrequenciesHPS(fft: TempiFFT, harmonics: Int=3, minMagnitude: Float=1) -> [(frequency: Float, magnitude: Float)] {
+    static func detectFundamentalFrequencies(fft: TempiFFT, harmonics: Int=3, minMagnitude: Float=1) -> [(frequency: Float, score: Float)] {
+        //apply HPS
         let hpsSpectrum = calculateHPSSpectrum(spectrum: fft.spectrum(), harmonics: harmonics)
         let hpsPeaks = FFTUtils.calculateFrequencyPeaks(spectrum: hpsSpectrum, binWidth: fft.bandwidth, minMagnitude: minMagnitude)
-        return hpsPeaks
+
+        let peakFundamentalFreqsScore = hpsPeaks.map { (peak) -> (frequency: Float, score: Float) in
+            //get fundamental frequency in raw spectrum related to HPS detection
+            let fp = FFTUtils.calculateFrequencyPeaks(spectrum: fft.spectrum(), binWidth: fft.bandwidth)
+            let closest = fp.sorted(by: { (elem1, elem2) -> Bool in
+                return abs(elem1.frequency-peak.frequency)<abs(elem2.frequency-peak.frequency)
+            })
+
+            //calculate how close to a rich tonal sound does this seems to be
+            let score = PitchAnalyser.calculateScoreForFundamentalFrequencyCandidate(frequency: closest[0].frequency, fft: fft)
+
+            return (frequency: closest[0].frequency, score: score)
+        }
+        
+        return peakFundamentalFreqsScore
     }
 
     static func calculateScoreForFundamentalFrequencyCandidate(frequency: Float, fft: TempiFFT) -> Float {

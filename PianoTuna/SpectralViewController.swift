@@ -50,18 +50,18 @@ class SpectralViewController: UIViewController {
         self.fftSpectrumView = FFTSpectrumView(frame: CGRect(x:0,y:0,width:self.view.bounds.width,height:self.view.bounds.height/2-20))
         self.fftSpectrumView.backgroundColor = UIColor.black
         self.fftSpectrumView.title = "Raw spectrum"
-        //        self.fftSpectrumView.zoomMinDB =
-        //        self.fftSpectrumView.zoomMaxDB =
-        //        self.fftSpectrumView.zoomFromFrequency = 100
-        //        self.fftSpectrumView.zoomToFrequency = 400
+//        self.fftSpectrumView.zoomMinDB =
+//        self.fftSpectrumView.zoomMaxDB =
+        self.fftSpectrumView.zoomFromFrequency = 0
+        self.fftSpectrumView.zoomToFrequency = 2000
         
         
         //draw hps spectrum
         self.hpsSpectrumView = HistogramView(frame: CGRect(x:0,y:0,width:self.view.bounds.width,height:self.view.bounds.height/2-20))
         self.hpsSpectrumView.backgroundColor = UIColor.black
         self.hpsSpectrumView.barColor = UIColor.red.cgColor
-//        self.hpsSpectrumView.minX = 0
-//        self.hpsSpectrumView.maxX = 100
+        self.hpsSpectrumView.minX = 0
+        self.hpsSpectrumView.maxX = 256
 
         //prepare main vertical layout
         let verticalLayout = VerticalLayoutView(width:view.bounds.width)
@@ -108,39 +108,45 @@ class SpectralViewController: UIViewController {
         fft.fftForward(samples)
 //        print("fft count=\(fft.magnitudes.count)")
         
-        // Interpolate the FFT data so there's one band per pixel.
-//        let screenWidth = UIScreen.main.bounds.size.width * UIScreen.main.scale
-//        fft.calculateLinearBands(minFrequency: 0, maxFrequency: fft.nyquistFrequency, numberOfBands: Int(screenWidth))
-
-        let hpsSpectrum = FFTPitchAnalyser.calculateHPSSpectrum(spectrum: fft.spectrum())
-        let peakFundamentalFreqs = FFTPitchAnalyser.detectFundamentalFrequenciesHPS(fft: fft, harmonics:4, minMagnitude:0.1)
+        let hpsSpectrum = PitchAnalyser.calculateHPSSpectrum(spectrum: fft.spectrum())
+        let peakFundamentalFreqs = PitchAnalyser.detectFundamentalFrequencies(fft: fft, harmonics:4, minMagnitude:0.1)
         
 //        let hm = FFTUtils.calculateHarmonicsMask(fundamentalFrequency: 100, binCount: 1000, binWidth: 1)
-//        print(hm.count)
-//        let peakFundamentalFreqsFiltered = peakFundamentalFreqs.filter { (peak) -> Bool in
-//            let score = FFTPitchAnalyser.calculateScoreForFundamentalFrequencyCandidate(frequency: peak.frequency, fft: fft)
-//            print(score)
-//            return score > 100
-//        }
-        let peakFundamentalFreqsSorted = peakFundamentalFreqs.sorted { (elem1, elem2) -> Bool in
-            let score1 = FFTPitchAnalyser.calculateScoreForFundamentalFrequencyCandidate(frequency: elem1.frequency, fft: fft)
-            let score2 = FFTPitchAnalyser.calculateScoreForFundamentalFrequencyCandidate(frequency: elem2.frequency, fft: fft)
-            return score1>score2
+
+        let peakFundamentalFreqsFiltered = peakFundamentalFreqs.filter { (peak) -> Bool in
+            return peak.score > 1
+        }
+
+        let peakFundamentalFreqsSorted = peakFundamentalFreqsFiltered.sorted { (peak1, peak2) -> Bool in
+            return peak1.score>peak2.score
         }
 //        print(peakFundamentalFreqs)
         
-//        let labelsFrequency = peakFundamentalFreqsFiltered.map { (peak) -> (frequency: Float, text: String) in
-//            return (frequency: peak.frequency, text: String(peak.frequency))
-//        }
-
-        var labelsFrequency = Array<(frequency:Float, text:String)>()
-        if peakFundamentalFreqsSorted.count>0 {
-            let first = peakFundamentalFreqsSorted[0]
-            labelsFrequency = [(frequency:first.frequency,text:"\(first.frequency)")]
-            print("best fundamental=\(first.frequency)Hz")
+        let labelsFrequency = peakFundamentalFreqsSorted.map { (peak) -> (frequency: Float, text: String) in
+            let note = EqualTemperamentCalculator.frequencyToNote(peak.frequency)
+            return (frequency: peak.frequency, text: "\(peak.frequency)Hz \(note.name) \(Int(round(note.cents)))¢")
         }
-//        print(viewLabels)
-        
+
+        self.hpsSpectrumView.annotations = []
+        if peakFundamentalFreqsSorted.count>0 {
+            let peak = peakFundamentalFreqsSorted[0]
+            let note = EqualTemperamentCalculator.frequencyToNote(peak.frequency)
+            print("detection=\(note.name) \(Int(round(note.cents)))¢ \(peak.frequency)Hz")
+            self.hpsSpectrumView.annotations.append((text:"\(note.name) \(Int(round(note.cents)))¢", x:100, y:100))
+        }
+        if peakFundamentalFreqsSorted.count>1 {
+            let peak = peakFundamentalFreqsSorted[1]
+            let note = EqualTemperamentCalculator.frequencyToNote(peak.frequency)
+            print("detection=\(note.name) \(Int(round(note.cents)))¢ \(peak.frequency)Hz")
+            self.hpsSpectrumView.annotations.append((text:"\(note.name) \(Int(round(note.cents)))¢", x:100, y:120))
+        }
+        if peakFundamentalFreqsSorted.count>2 {
+            let peak = peakFundamentalFreqsSorted[2]
+            let note = EqualTemperamentCalculator.frequencyToNote(peak.frequency)
+            print("detection=\(note.name) \(Int(round(note.cents)))¢ \(peak.frequency)Hz")
+            self.hpsSpectrumView.annotations.append((text:"\(note.name) \(Int(round(note.cents)))¢", x:100, y:140))
+        }
+
         tempi_dispatch_main { () -> () in
             self.fftSpectrumView.fft = fft
             self.fftSpectrumView.labelsFrequency = labelsFrequency

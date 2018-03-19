@@ -14,8 +14,9 @@
 		7C56300F205BEE74003111CF /* FFTSpectrumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C56300E205BEE74003111CF /* FFTSpectrumView.swift */; };
 		7C563011205C8561003111CF /* FFTUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C563010205C8561003111CF /* FFTUtils.swift */; };
 		7C563013205C9C38003111CF /* ScaledBandsFFT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C563012205C9C38003111CF /* ScaledBandsFFT.swift */; };
+		7C5F7220205F45FC003DBE84 /* EqualTemperamentCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C5F721F205F45FC003DBE84 /* EqualTemperamentCalculator.swift */; };
 		7CB9237F20585D5B0078486E /* Tests.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7CB9237E20585D5B0078486E /* Tests.storyboard */; };
-		7CD8D2EB2058B7EE008F95A1 /* FFTPitchAnalyser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CD8D2EA2058B7EE008F95A1 /* FFTPitchAnalyser.swift */; };
+		7CD8D2EB2058B7EE008F95A1 /* PitchAnalyser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CD8D2EA2058B7EE008F95A1 /* PitchAnalyser.swift */; };
 		7CD8D2F1205BBF31008F95A1 /* HistogramView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CD8D2F0205BBF31008F95A1 /* HistogramView.swift */; };
 		EF7009141C3ED07100E75ECF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7009131C3ED07100E75ECF /* AppDelegate.swift */; };
 		EF7009161C3ED07100E75ECF /* SpectralViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7009151C3ED07100E75ECF /* SpectralViewController.swift */; };
@@ -34,8 +35,9 @@
 		7C56300E205BEE74003111CF /* FFTSpectrumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFTSpectrumView.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		7C563010205C8561003111CF /* FFTUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFTUtils.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		7C563012205C9C38003111CF /* ScaledBandsFFT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaledBandsFFT.swift; sourceTree = "<group>"; };
+		7C5F721F205F45FC003DBE84 /* EqualTemperamentCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EqualTemperamentCalculator.swift; sourceTree = "<group>"; };
 		7CB9237E20585D5B0078486E /* Tests.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Tests.storyboard; sourceTree = "<group>"; };
-		7CD8D2EA2058B7EE008F95A1 /* FFTPitchAnalyser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFTPitchAnalyser.swift; sourceTree = "<group>"; wrapsLines = 0; };
+		7CD8D2EA2058B7EE008F95A1 /* PitchAnalyser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PitchAnalyser.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		7CD8D2F0205BBF31008F95A1 /* HistogramView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistogramView.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		EF7009101C3ED07100E75ECF /* PianoTuna.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PianoTuna.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EF7009131C3ED07100E75ECF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -61,10 +63,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7C5F721E205F4444003DBE84 /* tonal */ = {
+			isa = PBXGroup;
+			children = (
+				7CD8D2EA2058B7EE008F95A1 /* PitchAnalyser.swift */,
+				7C5F721F205F45FC003DBE84 /* EqualTemperamentCalculator.swift */,
+			);
+			path = tonal;
+			sourceTree = "<group>";
+		};
 		7CD8D2EC2058C98E008F95A1 /* fft */ = {
 			isa = PBXGroup;
 			children = (
-				7CD8D2EA2058B7EE008F95A1 /* FFTPitchAnalyser.swift */,
 				EFAC3F471C45C719002CD63F /* TempiFFT.swift */,
 				7C563010205C8561003111CF /* FFTUtils.swift */,
 				7C563012205C9C38003111CF /* ScaledBandsFFT.swift */,
@@ -102,6 +112,7 @@
 		EF7009121C3ED07100E75ECF /* PianoTuna */ = {
 			isa = PBXGroup;
 			children = (
+				7C5F721E205F4444003DBE84 /* tonal */,
 				7CD8D2ED2058C9CA008F95A1 /* utils */,
 				7CD8D2EC2058C98E008F95A1 /* fft */,
 				EF7009131C3ED07100E75ECF /* AppDelegate.swift */,
@@ -198,11 +209,12 @@
 				7C563011205C8561003111CF /* FFTUtils.swift in Sources */,
 				7C563013205C9C38003111CF /* ScaledBandsFFT.swift in Sources */,
 				7CD8D2F1205BBF31008F95A1 /* HistogramView.swift in Sources */,
-				7CD8D2EB2058B7EE008F95A1 /* FFTPitchAnalyser.swift in Sources */,
+				7CD8D2EB2058B7EE008F95A1 /* PitchAnalyser.swift in Sources */,
 				EFAC3F4E1C4D7B76002CD63F /* TempiDebug.swift in Sources */,
 				7C56300F205BEE74003111CF /* FFTSpectrumView.swift in Sources */,
 				EF7009161C3ED07100E75ECF /* SpectralViewController.swift in Sources */,
 				EF70092A1C3EDFB900E75ECF /* TempiAudioInput.swift in Sources */,
+				7C5F7220205F45FC003DBE84 /* EqualTemperamentCalculator.swift in Sources */,
 				EFAC3F461C406DC5002CD63F /* TempiUtilities.swift in Sources */,
 				EFAC3F481C45C719002CD63F /* TempiFFT.swift in Sources */,
 				7C56300D205BE839003111CF /* VerticalLayoutView.swift in Sources */,
