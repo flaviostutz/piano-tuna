@@ -20,16 +20,28 @@ class FFTSpectrumView: UIView {
         }
     }
     
-    var labelsFrequency: [(frequency: Float, text: String)]! {
+    var labelsFrequency: [(text: String, frequency: Double)]! {
         didSet {
             prepareSpectrumView(fft)
         }
     }
     
-    var zoomMinDB: Float!
-    var zoomMaxDB: Float!
-    var zoomFromFrequency: Float!
-    var zoomToFrequency: Float!
+    var annotations: [(text: String, x: Float, y: Float)]! {
+        didSet {
+            prepareSpectrumView(fft)
+        }
+    }
+
+    var annotationsFrequency: [(text: String, frequency: Double, y: Float)]! {
+        didSet {
+            prepareSpectrumView(fft)
+        }
+    }
+
+    var zoomMinDB: Double!
+    var zoomMaxDB: Double!
+    var zoomFromFrequency: Double!
+    var zoomToFrequency: Double!
     
     var title: String! {
         didSet {
@@ -54,7 +66,7 @@ class FFTSpectrumView: UIView {
         
         let maxDB = self.zoomMaxDB ?? 64.0
         let minDB = self.zoomMinDB ?? -32.0
-        let minFreq = self.zoomFromFrequency ?? 0
+        let minFreq = self.zoomFromFrequency ?? 0.0
         let maxFreq = self.zoomToFrequency ?? fft.nyquistFrequency
 
         var xAxisLabels = Array<String>()
@@ -62,23 +74,24 @@ class FFTSpectrumView: UIView {
             let freq = fft.frequencyAtIndex(i)
             
             //zoom frequency
-            if freq <= minFreq {
+            if freq <= minFreq+fft.bandwidth {
                 self.histogramView.minX = i
-            } else if freq >= maxFreq {
+            } else if freq >= maxFreq-fft.bandwidth {
                 self.histogramView.maxX = i
                 break
             }
             
             //x axis labels
-            let show = i%(Int((maxFreq-minFreq)/100))==0
+            let show = i%(Int(ceil((maxFreq-minFreq)/10.0)))==0
             xAxisLabels.append(show ? String(Int(freq)) : "")
         }
+        
         self.histogramView.xAxisLabels = xAxisLabels
 
         self.histogramView.minY = 0
         self.histogramView.maxY = maxDB - minDB
 
-        var spectrum = Array<Float>()
+        var spectrum = Array<Double>()
         
         var viewLabels = Array<String>()
         var labelsCounter = 0
@@ -105,6 +118,22 @@ class FFTSpectrumView: UIView {
             }
         }
         self.histogramView.labels = viewLabels
+        
+        //show annotations on specific frequencies
+        let viewWidth = Double(self.bounds.size.width)
+        var annotationsFromFrequency = Array<(text: String, x: Float, y: Float)>()
+        if self.annotationsFrequency != nil {
+            for af in self.annotationsFrequency {
+                if af.frequency >= minFreq && af.frequency <= maxFreq {
+                    let x = (af.frequency-minFreq) * (viewWidth/(maxFreq-minFreq))
+                    annotationsFromFrequency.append((text: "^", x: Float(x), y: af.y))
+                }
+            }
+        }
+        if self.annotations != nil {
+            annotationsFromFrequency.append(contentsOf: self.annotations)
+        }
+        self.histogramView.annotations = annotationsFromFrequency
 
         self.histogramView.barColor = UIColor.green.cgColor
         

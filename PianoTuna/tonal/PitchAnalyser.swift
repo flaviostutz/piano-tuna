@@ -1,21 +1,21 @@
 //
-//  FFTAnalyser.swift
+//  PitchAnalyser.swift
 //  PianoTuna
 //
 //  Created by Flavio de Oliveira Stutz on 3/13/18.
-//  Copyright © 2018 John Scalo. All rights reserved.
+//  Copyright © 2018 StutzLab. All rights reserved.
 //
 
 import Foundation
 
 class PitchAnalyser {
 
-    static func detectFundamentalFrequencies(fft: TempiFFT, harmonics: Int=3, minMagnitude: Float=1) -> [(frequency: Float, score: Float)] {
+    static func detectFundamentalFrequencies(fft: TempiFFT, harmonics: Int=3, minMagnitude: Double=1) -> [(frequency: Double, score: Double, magnitude: Double)] {
         //apply HPS
         let hpsSpectrum = calculateHPSSpectrum(spectrum: fft.spectrum(), harmonics: harmonics)
         let hpsPeaks = FFTUtils.calculateFrequencyPeaks(spectrum: hpsSpectrum, binWidth: fft.bandwidth, minMagnitude: minMagnitude)
 
-        let peakFundamentalFreqsScore = hpsPeaks.map { (peak) -> (frequency: Float, score: Float) in
+        let peakFundamentalFreqsScore = hpsPeaks.map { (peak) -> (frequency: Double, score: Double, magnitude: Double) in
             //get fundamental frequency in raw spectrum related to HPS detection
             let fp = FFTUtils.calculateFrequencyPeaks(spectrum: fft.spectrum(), binWidth: fft.bandwidth)
             let closest = fp.sorted(by: { (elem1, elem2) -> Bool in
@@ -23,35 +23,51 @@ class PitchAnalyser {
             })
 
             //calculate how close to a rich tonal sound does this seems to be
-            let score = PitchAnalyser.calculateScoreForFundamentalFrequencyCandidate(frequency: closest[0].frequency, fft: fft)
+            let score = calculatePerfectOvertonesScore(frequency: closest[0].frequency, fft: fft)
 
-            return (frequency: closest[0].frequency, score: score)
+            return (frequency: closest[0].frequency, score: score, magnitude: closest[0].magnitude)
         }
         
         return peakFundamentalFreqsScore
     }
 
-    static func calculateScoreForFundamentalFrequencyCandidate(frequency: Float, fft: TempiFFT) -> Float {
-        let harmonicsMask = FFTUtils.calculateHarmonicsMask(fundamentalFrequency: frequency, binCount: fft.magnitudes.count, binWidth: fft.bandwidth)
-        var score: Float = 0.0
+    static func calculatePerfectOvertonesScore(frequency: Double, fft: TempiFFT) -> Double {
+        let harmonicsMask = calculateHarmonicsMask(fundamentalFrequency: frequency, binCount: fft.magnitudes.count, binWidth: fft.bandwidth)
+        var score: Double = 0.0
         for i in 0..<fft.magnitudes.count {
             score += harmonicsMask[i] * fft.magnitudes[i]
         }
         return score
     }
     
-    static func calculateHPSSpectrum(spectrum: [Float], harmonics: Int=3) -> [Float] {
+    //calculates a matrix that describes (from -1 to 1) in which parts of the spectrum it is expected to detect a peak for a specified fundamental frequency
+    static func calculateHarmonicsMask(fundamentalFrequency: Double, binCount: Int, binWidth: Double) -> [Double] {
+        var mask = Array<Double>()
+        var freq: Double = 0
+        var currentOvertone = fundamentalFrequency
+        for _ in 0..<binCount {
+            if freq >= currentOvertone + (fundamentalFrequency/2) {
+                currentOvertone = currentOvertone + fundamentalFrequency
+            }
+            mask.append(FFTUtils.valuesNearRatio(value1:freq, value2:currentOvertone, zeroDiff:fundamentalFrequency/4))
+            freq = freq + binWidth
+        }
+        //        print(mask)
+        return mask
+    }
+    
+    static func calculateHPSSpectrum(spectrum: [Double], harmonics: Int=3) -> [Double] {
         //using Harmonic Product Spectrum (HPS) for now
         //more at https://cnx.org/contents/i5AAkZCP@2/Pitch-Detection-Algorithms
         
         let minIndex = 20
         
-        var spectrum0 = Array<Float>(spectrum)
+        var spectrum0 = Array<Double>(spectrum)
         let maxIndex = spectrum0.count - 1
         var maxHIndex = spectrum0.count / harmonics
         
         if maxHIndex*harmonics > maxIndex {
-            maxHIndex = Int(Float(maxIndex/harmonics).rounded())
+            maxHIndex = Int(Double(maxIndex/harmonics).rounded())
         }
         
         for j in minIndex...maxHIndex {

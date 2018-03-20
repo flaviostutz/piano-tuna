@@ -16,36 +16,36 @@ class ScaledBandsFFT {
     private(set) var numberOfBands: Int = 0
     
     /// The minimum and maximum frequencies in the calculated band spectrum (must call calculateLinearBands() or calculateLogarithmicBands() first).
-    private(set) var bandMinFreq, bandMaxFreq: Float!
+    private(set) var bandMinFreq, bandMaxFreq: Double!
 
     /// After calling calculateLinearBands() or calculateLogarithmicBands(), contains a magnitude for each band.
-    private(set) var bandMagnitudes: [Float]!
+    private(set) var bandMagnitudes: [Double]!
     
     /// After calling calculateLinearBands() or calculateLogarithmicBands(), contains the average frequency for each band
-    private(set) var bandFrequencies: [Float]!
+    private(set) var bandFrequencies: [Double]!
 
     init(fft: TempiFFT) {
         self.fft = fft
     }
 
     /// Applies logical banding on top of the spectrum data. The bands are spaced linearly throughout the spectrum.
-    func calculateLinearBands(minFrequency: Float, maxFrequency: Float, numberOfBands: Int) {
+    func calculateLinearBands(minFrequency: Double, maxFrequency: Double, numberOfBands: Int) {
         assert(fft.hasPerformedFFT, "*** Forward data to FFT first.")
 
         let actualMaxFrequency = min(fft.nyquistFrequency, maxFrequency)
         
         self.numberOfBands = numberOfBands
-        self.bandMagnitudes = [Float](repeating: 0.0, count: numberOfBands)
-        self.bandFrequencies = [Float](repeating: 0.0, count: numberOfBands)
+        self.bandMagnitudes = [Double](repeating: 0.0, count: numberOfBands)
+        self.bandFrequencies = [Double](repeating: 0.0, count: numberOfBands)
         
         let magLowerRange = fft.magIndexForFreq(minFrequency)
         let magUpperRange = fft.magIndexForFreq(actualMaxFrequency)
-        let ratio: Float = Float(magUpperRange - magLowerRange) / Float(numberOfBands)
+        let ratio: Double = Double(magUpperRange - magLowerRange) / Double(numberOfBands)
         
         for i in 0..<numberOfBands {
-            let magsStartIdx: Int = Int(floorf(Float(i) * ratio)) + magLowerRange
-            let magsEndIdx: Int = Int(floorf(Float(i + 1) * ratio)) + magLowerRange
-            var magsAvg: Float
+            let magsStartIdx: Int = Int(floor(Double(i) * ratio)) + magLowerRange
+            let magsEndIdx: Int = Int(floor(Double(i + 1) * ratio)) + magLowerRange
+            var magsAvg: Double
             if magsEndIdx == magsStartIdx {
                 // Can happen when numberOfBands < # of magnitudes. No need to average anything.
                 magsAvg = fft.magnitudes[magsStartIdx]
@@ -61,7 +61,7 @@ class ScaledBandsFFT {
     }
 
     /// Applies logical banding on top of the spectrum data. The bands are grouped by octave throughout the spectrum. Note that the actual min and max frequencies in the resulting band may be lower/higher than the minFrequency/maxFrequency because the band spectrum <i>includes</i> those frequencies but isn't necessarily bounded by them.
-    func calculateLogarithmicBands(minFrequency: Float, maxFrequency: Float, bandsPerOctave: Int) {
+    func calculateLogarithmicBands(minFrequency: Double, maxFrequency: Double, bandsPerOctave: Int) {
         assert(fft.hasPerformedFFT, "*** Forward data to FFT first.")
         
         // The max can't be any higher than the nyquist
@@ -71,7 +71,7 @@ class ScaledBandsFFT {
         let actualMinFrequency = max(1, minFrequency)
         
         // Define the octave frequencies we'll be working with. Note that in order to always include minFrequency, we'll have to set the lower boundary to the octave just below that frequency.
-        var octaveBoundaryFreqs: [Float] = [Float]()
+        var octaveBoundaryFreqs: [Double] = [Double]()
         var curFreq = actualMaxFrequency
         octaveBoundaryFreqs.append(curFreq)
         repeat {
@@ -81,8 +81,8 @@ class ScaledBandsFFT {
         
         octaveBoundaryFreqs = octaveBoundaryFreqs.reversed()
         
-        self.bandMagnitudes = [Float]()
-        self.bandFrequencies = [Float]()
+        self.bandMagnitudes = [Double]()
+        self.bandFrequencies = [Double]()
         
         // Break up the spectrum by octave
         for i in 0..<octaveBoundaryFreqs.count - 1 {
@@ -90,12 +90,12 @@ class ScaledBandsFFT {
             let upperFreq = octaveBoundaryFreqs[i+1]
             
             let mags = fft.magsInFreqRange(lowerFreq, upperFreq)
-            let ratio =  Float(mags.count) / Float(bandsPerOctave)
+            let ratio =  Double(mags.count) / Double(bandsPerOctave)
             
             // Now that we have the magnitudes within this octave, cluster them into bandsPerOctave groups and average each group.
             for j in 0..<bandsPerOctave {
-                let startIdx = Int(ratio * Float(j))
-                var stopIdx = Int(ratio * Float(j+1)) - 1 // inclusive
+                let startIdx = Int(ratio * Double(j))
+                var stopIdx = Int(ratio * Double(j+1)) - 1 // inclusive
                 
                 stopIdx = max(0, stopIdx)
                 
@@ -119,7 +119,7 @@ class ScaledBandsFFT {
 
     /// Get the magnitude for the specified frequency band.
     /// - Parameter inBand: The frequency band you want a magnitude for.
-    func magnitudeAtBand(_ inBand: Int) -> Float {
+    func magnitudeAtBand(_ inBand: Int) -> Double {
         assert(bandMagnitudes != nil, "*** Call calculateLinearBands() or calculateLogarithmicBands() first")
         return bandMagnitudes[inBand]
     }
@@ -127,7 +127,7 @@ class ScaledBandsFFT {
     /// Get the middle frequency of the Nth band.
     /// - Parameter inBand: An index where 0 <= inBand < size / 2.
     /// - Returns: The middle frequency of the provided band.
-    func frequencyAtBand(_ inBand: Int) -> Float {
+    func frequencyAtBand(_ inBand: Int) -> Double {
         assert(bandMagnitudes != nil, "*** Call calculateLinearBands() or calculateLogarithmicBands() first")
         return self.bandFrequencies[inBand]
     }

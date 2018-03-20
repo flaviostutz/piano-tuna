@@ -12,13 +12,13 @@ import UIKit
 //This view shows a data graph along with labels and custom geometries along both axis
 class HistogramView: UIView {
 
-    var data: [Float]! {
+    var data: [Double]! {
         didSet {
             self.setNeedsDisplay()
         }
     }
-    var minY: Float!
-    var maxY: Float!
+    var minY: Double!
+    var maxY: Double!
     var minX: Int!
     var maxX: Int!
     var barColor: CGColor!
@@ -65,10 +65,10 @@ class HistogramView: UIView {
     }
     
     private func prepareFonts() {
-        labelFont = UIFont.systemFont(ofSize: CGFloat(labelFontSize), weight: UIFontWeightRegular)
-        titleFont = UIFont.systemFont(ofSize: CGFloat(titleFontSize), weight: UIFontWeightRegular)
-        xAxisLabelsFont = UIFont.systemFont(ofSize: CGFloat(xAxisLabelsFontSize), weight: UIFontWeightRegular)
-        annotationsFont = UIFont.systemFont(ofSize: CGFloat(annotationsFontSize), weight: UIFontWeightRegular)
+        labelFont = UIFont.systemFont(ofSize: CGFloat(labelFontSize), weight: UIFont.Weight.regular)
+        titleFont = UIFont.systemFont(ofSize: CGFloat(titleFontSize), weight: UIFont.Weight.regular)
+        xAxisLabelsFont = UIFont.systemFont(ofSize: CGFloat(xAxisLabelsFontSize), weight: UIFont.Weight.regular)
+        annotationsFont = UIFont.systemFont(ofSize: CGFloat(annotationsFontSize), weight: UIFont.Weight.regular)
     }
     
     override func draw(_ rect: CGRect) {
@@ -115,10 +115,10 @@ class HistogramView: UIView {
             locations: [0.0, 0.3, 0.6])
         
         //x axis
-        let scale: CGFloat = UIScreen.main.scale
+//        let scale: CGFloat = UIScreen.main.scale
         let maxXIndex = self.maxX ?? self.data.count - 1
         let minXIndex = self.minX ?? 0
-        let colWidth = Float((viewWidth / CGFloat((maxXIndex-minXIndex+1)) * scale / scale))
+        let colWidth = Float((viewWidth / CGFloat((maxXIndex-minXIndex+1))))
 
         //y axis
         let minYValue = self.minY ?? self.data.min() ?? 0
@@ -132,7 +132,7 @@ class HistogramView: UIView {
             let ratio = magnitude/(maxYValue - minYValue)
             let magnitudeHeight = CGFloat(ratio) * maxColHeight
             
-            let colRect: CGRect = CGRect(x: CGFloat(colWidth*Float(i)), y: plotYStart - negativeMinOffset, width: CGFloat(colWidth), height: magnitudeHeight)
+            let colRect: CGRect = CGRect(x: CGFloat(colWidth*Float(i-minXIndex)), y: plotYStart - negativeMinOffset, width: CGFloat(colWidth), height: magnitudeHeight)
 //            print("colRect \(colRect)")
 
             if self.barColor != nil {
@@ -168,8 +168,8 @@ class HistogramView: UIView {
 
         //draw title
         let attrStr = NSMutableAttributedString(string: title)
-        attrStr.addAttribute(NSFontAttributeName, value: titleFont, range: NSMakeRange(0, title.count))
-        attrStr.addAttribute(NSForegroundColorAttributeName, value: UIColor.yellow, range: NSMakeRange(0, title.count))
+        attrStr.addAttribute(NSAttributedStringKey.font, value: titleFont, range: NSMakeRange(0, title.count))
+        attrStr.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.yellow, range: NSMakeRange(0, title.count))
         let x: CGFloat = viewWidth / 2.0 - attrStr.size().width / 2.0
         attrStr.draw(at: CGPoint(x: x, y: -(viewHeight - CGFloat(titleFontSize*0.1))))
     }
@@ -216,8 +216,8 @@ class HistogramView: UIView {
             }
             let label = labels[i]
             let attrStr = NSMutableAttributedString(string: label)
-            attrStr.addAttribute(NSFontAttributeName, value: labelFont, range: NSMakeRange(0, label.count))
-            attrStr.addAttribute(NSForegroundColorAttributeName, value: UIColor.yellow, range: NSMakeRange(0, label.count))
+            attrStr.addAttribute(NSAttributedStringKey.font, value: labelFont, range: NSMakeRange(0, label.count))
+            attrStr.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.yellow, range: NSMakeRange(0, label.count))
             
             let x = CGFloat(colWidth*Float(i) + colWidth/2 - labelFontSize/2)
             let ratio = self.data[i]/(maxYValue - minYValue)
@@ -257,8 +257,8 @@ class HistogramView: UIView {
                 continue
             }
             let attrStr = NSMutableAttributedString(string: label)
-            attrStr.addAttribute(NSFontAttributeName, value: xAxisLabelsFont, range: NSMakeRange(0, label.count))
-            attrStr.addAttribute(NSForegroundColorAttributeName, value: UIColor.yellow, range: NSMakeRange(0, label.count))
+            attrStr.addAttribute(NSAttributedStringKey.font, value: xAxisLabelsFont, range: NSMakeRange(0, label.count))
+            attrStr.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.yellow, range: NSMakeRange(0, label.count))
             
             let x = CGFloat(colWidth*Float(i) + colWidth/2 - xAxisLabelsFontSize/2)
             attrStr.draw(at: CGPoint(x: x + CGFloat(xAxisLabelsFontSize*0.5), y: -CGFloat(xAxisLabelsFontSize*1.2)))
@@ -274,8 +274,8 @@ class HistogramView: UIView {
         
         for annotation in annotations {
             let attrStr = NSMutableAttributedString(string: annotation.text)
-            attrStr.addAttribute(NSFontAttributeName, value: annotationsFont, range: NSMakeRange(0, annotation.text.count))
-            attrStr.addAttribute(NSForegroundColorAttributeName, value: UIColor.yellow, range: NSMakeRange(0, annotation.text.count))
+            attrStr.addAttribute(NSAttributedStringKey.font, value: annotationsFont, range: NSMakeRange(0, annotation.text.count))
+            attrStr.addAttribute(NSAttributedStringKey.foregroundColor, value: UIColor.yellow, range: NSMakeRange(0, annotation.text.count))
             attrStr.draw(at: CGPoint(x: CGFloat(annotation.x), y: CGFloat(annotation.y)))
         }
         

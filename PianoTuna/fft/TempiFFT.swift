@@ -48,22 +48,22 @@ import Accelerate
     private(set) var size: Int
     
     /// The sample rate provided at init time.
-    private(set) var sampleRate: Float
+    private(set) var sampleRate: Double
     
     /// The Nyquist frequency is ```sampleRate``` / 2
-    var nyquistFrequency: Float {
+    var nyquistFrequency: Double {
         get {
             return sampleRate / 2.0
         }
     }
     
     // After performing the FFT, contains size/2 magnitudes, one for each frequency band.
-    var magnitudes: [Float]!
+    var magnitudes: [Double]!
     
     /// The average bandwidth throughout the spectrum (nyquist / magnitudes.count)
-    var bandwidth: Float {
+    var bandwidth: Double {
         get {
-            return self.nyquistFrequency / Float(self.magnitudes.count)
+            return self.nyquistFrequency / Double(self.magnitudes.count)
         }
     }
     
@@ -72,76 +72,76 @@ import Accelerate
     
     private var halfSize:Int
     private var log2Size:Int
-    private var window:[Float]!
+    private var window:[Double]!
     private var fftSetup:FFTSetup
-    private var complexBuffer: DSPSplitComplex!
+    private var complexBuffer: DSPDoubleSplitComplex!
     
     /// Instantiate the FFT.
     /// - Parameter withSize: The length of the sample buffer we'll be analyzing. Must be a power of 2. The resulting ```magnitudes``` are of length ```inSize/2```.
     /// - Parameter sampleRate: Sampling rate of the provided audio data.
-    init(withSize inSize:Int, sampleRate inSampleRate: Float) {
+    init(withSize inSize:Int, sampleRate inSampleRate: Double) {
         
-        let sizeFloat: Float = Float(inSize)
+        let sizeDouble: Double = Double(inSize)
         
         self.sampleRate = inSampleRate
         
         // Check if the size is a power of two
-        let lg2 = logbf(sizeFloat)
-        assert(remainderf(sizeFloat, powf(2.0, lg2)) == 0, "size must be a power of 2")
+        let lg2 = logb(sizeDouble)
+        assert(remainder(sizeDouble, pow(2.0, lg2)) == 0, "size must be a power of 2")
         
         self.size = inSize
         self.halfSize = inSize / 2
         
         // create fft setup
-        self.log2Size = Int(log2f(sizeFloat))
-        self.fftSetup = vDSP_create_fftsetup(UInt(log2Size), FFTRadix(FFT_RADIX2))!
+        self.log2Size = Int(log2(sizeDouble))
+        self.fftSetup = vDSP_create_fftsetupD(UInt(log2Size), FFTRadix(FFT_RADIX2))!
         
         // Init the complexBuffer
-        var real = [Float](repeating: 0.0, count: self.halfSize)
-        var imaginary = [Float](repeating: 0.0, count: self.halfSize)
-        self.complexBuffer = DSPSplitComplex(realp: &real, imagp: &imaginary)
+        var real = [Double](repeating: 0.0, count: self.halfSize)
+        var imaginary = [Double](repeating: 0.0, count: self.halfSize)
+        self.complexBuffer = DSPDoubleSplitComplex(realp: &real, imagp: &imaginary)
     }
     
     deinit {
         // destroy the fft setup object
-        vDSP_destroy_fftsetup(fftSetup)
+        vDSP_destroy_fftsetupD(fftSetup)
     }
     
     /// Perform a forward FFT on the provided single-channel audio data. When complete, the instance can be queried for information about the analysis or the magnitudes can be accessed directly.
     /// - Parameter inMonoBuffer: Audio data in mono format
-    func fftForward(_ inMonoBuffer:[Float]) {
+    func fftForward(_ inMonoBuffer:[Double]) {
         var analysisBuffer = inMonoBuffer
         
         // If we have a window, apply it now. Since 99.9% of the time the window array will be exactly the same, an optimization would be to create it once and cache it, possibly caching it by size.
         if self.windowType != .none {
             
             if self.window == nil {
-                self.window = [Float](repeating: 0.0, count: size)
+                self.window = [Double](repeating: 0.0, count: size)
                 
                 switch self.windowType {
                 case .hamming:
-                    vDSP_hamm_window(&self.window!, UInt(size), 0)
+                    vDSP_hamm_windowD(&self.window!, UInt(size), 0)
                 case .hanning:
-                    vDSP_hann_window(&self.window!, UInt(size), Int32(vDSP_HANN_NORM))
+                    vDSP_hann_windowD(&self.window!, UInt(size), Int32(vDSP_HANN_NORM))
                 default:
                     break
                 }
             }
             
             // Apply the window
-            vDSP_vmul(inMonoBuffer, 1, self.window, 1, &analysisBuffer, 1, UInt(inMonoBuffer.count))
+            vDSP_vmulD(inMonoBuffer, 1, self.window, 1, &analysisBuffer, 1, UInt(inMonoBuffer.count))
         }
         
 
         // vDSP_ctoz converts an interleaved vector into a complex split vector. i.e. moves the even indexed samples into frame.buffer.realp and the odd indexed samples into frame.buffer.imagp.
-//        var imaginary = [Float](repeating: 0.0, count: analysisBuffer.count)
+//        var imaginary = [Double](repeating: 0.0, count: analysisBuffer.count)
 //        var splitComplex = DSPSplitComplex(realp: &analysisBuffer, imagp: &imaginary)
 //        let length = vDSP_Length(self.log2Size)
 //        vDSP_fft_zip(self.fftSetup, &splitComplex, 1, length, FFTDirection(FFT_FORWARD))
 
         // Doing the job of vDSP_ctoz 😒. (See below.)
-        var reals = [Float]()
-        var imags = [Float]()
+        var reals = [Double]()
+        var imags = [Double]()
         for (idx, element) in analysisBuffer.enumerated() {
             if idx % 2 == 0 {
                 reals.append(element)
@@ -149,7 +149,7 @@ import Accelerate
                 imags.append(element)
             }
         }
-        self.complexBuffer = DSPSplitComplex(realp: UnsafeMutablePointer(mutating: reals), imagp: UnsafeMutablePointer(mutating: imags))
+        self.complexBuffer = DSPDoubleSplitComplex(realp: UnsafeMutablePointer(mutating: reals), imagp: UnsafeMutablePointer(mutating: imags))
         
         // This compiles without error but doesn't actually work. It results in garbage values being stored to the complexBuffer's real and imag parts. Why? The above workaround is undoubtedly tons slower so it would be good to get vDSP_ctoz working again.
 //        withUnsafePointer(to: &analysisBuffer, { $0.withMemoryRebound(to: DSPComplex.self, capacity: analysisBuffer.count) {
@@ -157,36 +157,36 @@ import Accelerate
 //            }
 //        })
         // Verifying garbage values.
-//        let rFloats = [Float](UnsafeBufferPointer(start: self.complexBuffer.realp, count: self.halfSize))
-//        let iFloats = [Float](UnsafeBufferPointer(start: self.complexBuffer.imagp, count: self.halfSize))
+//        let rDoubles = [Double](UnsafeBufferPointer(start: self.complexBuffer.realp, count: self.halfSize))
+//        let iDoubles = [Double](UnsafeBufferPointer(start: self.complexBuffer.imagp, count: self.halfSize))
         
         // Perform a forward FFT
-        vDSP_fft_zrip(self.fftSetup, &(self.complexBuffer!), 1, UInt(self.log2Size), Int32(FFT_FORWARD))
+        vDSP_fft_zripD(self.fftSetup, &(self.complexBuffer!), 1, UInt(self.log2Size), Int32(FFT_FORWARD))
         
         // Store and square (for better visualization & conversion to db) the magnitudes
-        self.magnitudes = [Float](repeating: 0.0, count: self.halfSize)
-        vDSP_zvmags(&(self.complexBuffer!), 1, &self.magnitudes!, 1, UInt(self.halfSize))
+        self.magnitudes = [Double](repeating: 0.0, count: self.halfSize)
+        vDSP_zvmagsD(&(self.complexBuffer!), 1, &self.magnitudes!, 1, UInt(self.halfSize))
         
         //show info
-        print("bins:\(magnitudes.count) binWidth:\(self.nyquistFrequency/Float(self.magnitudes.count))Hz; maxFrequency:\(self.nyquistFrequency)Hz")
+        print("bins:\(magnitudes.count) binWidth:\(self.nyquistFrequency/Double(self.magnitudes.count))Hz; maxFrequency:\(self.nyquistFrequency)Hz")
         
         self.hasPerformedFFT = true
     }
     
-    func magIndexForFreq(_ freq: Float) -> Int {
-        return Int(Float(self.magnitudes.count) * freq / self.nyquistFrequency)
+    func magIndexForFreq(_ freq: Double) -> Int {
+        return Int(Double(self.magnitudes.count) * freq / self.nyquistFrequency)
     }
     
     // On arrays of 1024 elements, this is ~35x faster than an iterational algorithm. Thanks Accelerate.framework!
-    @inline(__always) func fastAverage(_ array:[Float], _ startIdx: Int, _ stopIdx: Int) -> Float {
-        var mean: Float = 0
-        let ptr = UnsafePointer<Float>(array)
-        vDSP_meanv(ptr + startIdx, 1, &mean, UInt(stopIdx - startIdx))
+    @inline(__always) func fastAverage(_ array:[Double], _ startIdx: Int, _ stopIdx: Int) -> Double {
+        var mean: Double = 0
+        let ptr = UnsafePointer<Double>(array)
+        vDSP_meanvD(ptr + startIdx, 1, &mean, UInt(stopIdx - startIdx))
         
         return mean
     }
     
-    @inline(__always) func magsInFreqRange(_ lowFreq: Float, _ highFreq: Float) -> [Float] {
+    @inline(__always) func magsInFreqRange(_ lowFreq: Double, _ highFreq: Double) -> [Double] {
         let lowIndex = Int(lowFreq / self.bandwidth)
         var highIndex = Int(highFreq / self.bandwidth)
         
@@ -198,23 +198,23 @@ import Accelerate
         return Array(self.magnitudes[lowIndex..<highIndex])
     }
     
-    @inline(__always) func averageFrequencyInRange(_ startIndex: Int, _ endIndex: Int) -> Float {
-        return (self.bandwidth * Float(startIndex) + self.bandwidth * Float(endIndex)) / 2
+    @inline(__always) func averageFrequencyInRange(_ startIndex: Int, _ endIndex: Int) -> Double {
+        return (self.bandwidth * Double(startIndex) + self.bandwidth * Double(endIndex)) / 2
     }
     
     /// Get the magnitude of the requested frequency in the spectrum.
     /// - Parameter inFrequency: The requested frequency. Must be less than the Nyquist frequency (```sampleRate/2```).
     /// - Returns: A magnitude.
-    func magnitudeAtFrequency(_ inFrequency: Float) -> Float {
+    func magnitudeAtFrequency(_ inFrequency: Double) -> Double {
         assert(hasPerformedFFT, "*** Perform the FFT first.")
-        let index = Int(floorf(inFrequency / self.bandwidth ))
-        return self.magnitudes[index]
+        let index = Int(floor(inFrequency / self.bandwidth ))
+        return self.magnitudes[min(index, self.magnitudes.count-1)]
     }
     
     /// Calculate the average magnitude of the frequency band bounded by lowFreq and highFreq, inclusive
-    func averageMagnitude(lowFreq: Float, highFreq: Float) -> Float {
+    func averageMagnitude(lowFreq: Double, highFreq: Double) -> Double {
         var curFreq = lowFreq
-        var total: Float = 0
+        var total: Double = 0
         var count: Int = 0
         while curFreq <= highFreq {
             total += magnitudeAtFrequency(curFreq)
@@ -222,13 +222,13 @@ import Accelerate
             count += 1
         }
         
-        return total / Float(count)
+        return total / Double(count)
     }
     
     /// Sum magnitudes across bands bounded by lowFreq and highFreq, inclusive
-    func sumMagnitudes(lowFreq: Float, highFreq: Float, useDB: Bool) -> Float {
+    func sumMagnitudes(lowFreq: Double, highFreq: Double, useDB: Bool) -> Double {
         var curFreq = lowFreq
-        var total: Float = 0
+        var total: Double = 0
         while curFreq <= highFreq {
             var mag = magnitudeAtFrequency(curFreq)
             if (useDB) {
@@ -241,11 +241,38 @@ import Accelerate
         return total
     }
     
-    func spectrum() -> [Float] {
+    func subtractMagnitude(_ magnitudes:[Double]) {
+        assert(magnitudes.count == self.magnitudes.count, "subtract magnitudes must have the same length as fft")
+        for i in 0..<self.magnitudes.count {
+            self.magnitudes[i] = max(0, (self.magnitudes[i]-magnitudes[i]))
+        }
+    }
+    
+    func applyGain(fromIndex: Int, toIndex: Int, gain: Double) {
+        assert(toIndex<self.magnitudes.count, "toIndex invalid")
+        for i in fromIndex...toIndex {
+            self.magnitudes[i] = self.magnitudes[i]*gain
+        }
+    }
+    
+    func maskedSpectrum(fromIndex: Int, toIndex: Int) -> [Double] {
+        assert(toIndex<self.magnitudes.count, "toIndex invalid")
+        var result = Array<Double>()
+        for i in 0..<self.magnitudes.count {
+            if i>=fromIndex && i<=toIndex {
+                result.append(self.magnitudes[i])
+            } else {
+                result.append(0.0)
+            }
+        }
+        return result
+    }
+    
+    func spectrum() -> [Double] {
         return self.magnitudes
     }
     
-    func frequencyAtIndex(_ index:Int) -> Float {
-        return self.bandwidth * Float(index)
+    func frequencyAtIndex(_ index:Int) -> Double {
+        return self.bandwidth * Double(index) + self.bandwidth/2.0
     }
 }

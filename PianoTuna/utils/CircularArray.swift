@@ -19,12 +19,16 @@ public struct CircularArray<T> {
     
     // MARK: Creating a Circular Array
     
+    var maxSize: Int!
+    
     /// Constructs an empty circular array.
-    public init() {}
+    public init(maxSize: Int!) {
+        self.maxSize = maxSize
+    }
     
     /// Constructs a circular array with a given number of elements, each
     /// initialized to the same value.
-    public init(repeating repeatedValue: T, count: Int) {
+    public init(repeating repeatedValue: T, count: Int, maxSize: Int!) {
         precondition(count >= 0, "Can't construct CircularArray with count < 0")
         
         var nextPowerOfTwo = 1
@@ -36,6 +40,7 @@ public struct CircularArray<T> {
         items = [T?](repeating: repeatedValue, count: capacity)
         items[count..<capacity] = [nil]
         tail = count
+        self.maxSize = maxSize
     }
     
     /// Constructs a circular array from a sequence, such as an array.
@@ -74,6 +79,11 @@ public struct CircularArray<T> {
         head = decreaseIndex(head)
         items[head] = element
         checkCapacity()
+
+        //keep array with a maximum size
+        if self.maxSize != nil && self.count > self.maxSize {
+            self.removeLast()
+        }
     }
     
     /// Adds a new item as the last element in an existing circular array.
@@ -81,6 +91,11 @@ public struct CircularArray<T> {
         items[tail] = element
         tail = increaseIndex(tail)
         checkCapacity()
+
+        //keep array with a maximum size
+        if self.maxSize != nil && self.count > self.maxSize {
+            self.removeFirst()
+        }
     }
     
     /// Removes the first element from the circular array and returns it.
