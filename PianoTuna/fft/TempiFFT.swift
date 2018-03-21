@@ -68,7 +68,7 @@ import Accelerate
     }
     
     /// Supplying a window type (hanning or hamming) smooths the edges of the incoming waveform and reduces output errors from the FFT function (aka "spectral leakage" - ewww).
-    var windowType = TempiFFTWindowType.none
+    var windowType = TempiFFTWindowType.hanning
     
     private var halfSize:Int
     private var log2Size:Int
@@ -174,7 +174,7 @@ import Accelerate
     }
     
     func magIndexForFreq(_ freq: Double) -> Int {
-        return Int(Double(self.magnitudes.count) * freq / self.nyquistFrequency)
+        return min(self.magnitudes.count-1, Int(Double(self.magnitudes.count) * freq / self.nyquistFrequency))
     }
     
     // On arrays of 1024 elements, this is ~35x faster than an iterational algorithm. Thanks Accelerate.framework!

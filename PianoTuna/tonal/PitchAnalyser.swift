@@ -10,7 +10,7 @@ import Foundation
 
 class PitchAnalyser {
 
-    static func detectFundamentalFrequencies(fft: TempiFFT, harmonics: Int=3, minMagnitude: Double=1) -> [(frequency: Double, score: Double, magnitude: Double)] {
+    static func detectFundamentalFrequencies(fft: TempiFFT, harmonics: Int=4, minMagnitude: Double=0.1) -> [(frequency: Double, score: Double, magnitude: Double)] {
         //apply HPS
         let hpsSpectrum = calculateHPSSpectrum(spectrum: fft.spectrum(), harmonics: harmonics)
         let hpsPeaks = FFTUtils.calculateFrequencyPeaks(spectrum: hpsSpectrum, binWidth: fft.bandwidth, minMagnitude: minMagnitude)

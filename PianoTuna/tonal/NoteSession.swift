@@ -46,7 +46,7 @@ class NoteSession {
     func step(fft: TempiFFT) {
 
         overallMagnitude.addSample(value: fft.sumMagnitudes(lowFreq: 0, highFreq: fft.nyquistFrequency, useDB: false))
-        print("Level=\(overallMagnitude.getAverage()) \(fft.sumMagnitudes(lowFreq: 0, highFreq: fft.nyquistFrequency, useDB: false))")
+        print("Level=\(overallMagnitude.getAverage())")
 
         //wait for calmness
         if phase == NoteSessionPhase.release {
@@ -55,7 +55,22 @@ class NoteSession {
             self.zoomFrequencyFrom = nil
             self.zoomFrequencyTo = nil
             
-            if overallMagnitude.getAverage() < 5 {
+            //high change detected. may be an attack
+            if (abs(overallMagnitude.getLastSample()-overallMagnitude.getAverage()))>5 && timeInPhase()>50 {
+                
+                let peakFundamentalFreqs = detectBestFundamentalPeaks(fft: fft)
+                
+                //hit was caused by a tonal sound
+                if peakFundamentalFreqs.count>0 {
+                    print("TONAL")
+                    startPhase(phase: NoteSessionPhase.attack, fft: fft)
+                    
+                //hit was caused by an atonal sound. ignore
+                } else {
+                    print("ATONAL")
+                }
+                
+            } else if overallMagnitude.getAverage() < 5 {
                 startPhase(phase: NoteSessionPhase.backgroundNoise, fft: fft)
                 self.backgroundNoise = MovingAverageBins(binCount: fft.spectrum().count, maxSamples: 16)
             }
@@ -86,7 +101,10 @@ class NoteSession {
         
         } else if phase == NoteSessionPhase.attack {
             //remove measured background noise
-            let backgroundNoiseAvg = self.backgroundNoise.getAverage()
+            var backgroundNoiseAvg: [Double]!
+            if self.backgroundNoise != nil {
+                backgroundNoiseAvg = self.backgroundNoise.getAverage()
+            }
             if backgroundNoiseAvg == nil {
                 print("NO BACKGROUND NOISE")
                 startPhase(phase: NoteSessionPhase.release, fft: fft)
@@ -132,7 +150,21 @@ class NoteSession {
             if overallMagnitude.getAverage()<1.3 {
                 print("SIGNAL TOO LOW")
                 startPhase(phase: NoteSessionPhase.release, fft: fft)
-                    
+                
+//            //high change detected. may be another attack
+//            } else if (abs(overallMagnitude.getLastSample()-overallMagnitude.getAverage()))>1000 {
+//                let peakFundamentalFreqs = detectBestFundamentalPeaks(fft: fft)
+//
+//                //hit was caused by a tonal sound
+//                if peakFundamentalFreqs.count>0 {
+//                    print("TONAL")
+//                    startPhase(phase: NoteSessionPhase.attack, fft: fft)
+//
+//                //hit was caused by an atonal sound. just ignore it
+//                } else {
+//                    print("ATONAL")
+//                }
+
             } else {
                 self.zoomedTonalPeaks = FFTUtils.calculateFrequencyPeaks(spectrum: zoomedAverage!, binWidth: fft.bandwidth)
             }

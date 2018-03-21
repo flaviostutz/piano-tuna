@@ -42,7 +42,7 @@ class NoteIntervalCalculator {
             }
         }
         noteNumber = noteNumber + (12*Int(oct))
-        print("NOTE \(noteNumber) \(oct)")
+//        print("NOTE \(noteNumber) \(oct)")
         let noteFrequency = frequencyForNoteEqualTemperament(noteNumber: noteNumber)
         return ( name: "\(note)\(Int(oct))".replacingOccurrences(of: " ", with: ""), cents: cents, noteFrequency: noteFrequency, noteNumber: noteNumber, realFrequency: frequency )
     }

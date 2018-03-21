@@ -14,7 +14,6 @@ class FFTUtils {
         var peakFreqs = Array<(frequency: Double, magnitude: Double)>()
         var lastMag: Double = 0
         var lastLastMag: Double = 0
-        var currentPeakMag: Double = 0
         var spectrumIndex = 0
         
         for mag in spectrum {
@@ -30,18 +29,18 @@ class FFTUtils {
             }
             
             //climbing peak
-            if mag>=currentPeakMag && filter {
-                currentPeakMag = mag
+            if mag>=lastMag && filter {
+
                 
             //just after the peak
             } else {
                 
-                if lastLastMag>0 && lastMag>0 && currentPeakMag>0 {
+                if lastLastMag>0 && lastMag>0 && mag<=lastMag {
                     
                     //calculate best frequency fit between (possible) peak elements
                     //see other methods at https://dspguru.com/dsp/howtos/how-to-interpolate-fft-peak/
                     let peak1 = lastLastMag
-                    let peak2 = currentPeakMag
+                    let peak2 = lastMag
                     let peak3 = mag
                     
                     //Barycentric method
@@ -51,16 +50,13 @@ class FFTUtils {
                     
                     let peakFreq = (binWidth * (Double(spectrumIndex)-1)) + freqDiff
                     
-                    peakFreqs.append((frequency:peakFreq, magnitude:currentPeakMag))
+                    peakFreqs.append((frequency:peakFreq, magnitude:lastMag))
                 }
-                
-                currentPeakMag = 0
-                lastLastMag = 0
-                lastMag = 0
             }
             
             lastLastMag = lastMag
             lastMag = mag
+            
             spectrumIndex = spectrumIndex+1
         }
         return peakFreqs
