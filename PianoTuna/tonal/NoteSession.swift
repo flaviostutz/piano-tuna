@@ -55,22 +55,7 @@ class NoteSession {
             self.zoomFrequencyFrom = nil
             self.zoomFrequencyTo = nil
             
-            //high change detected. may be an attack
-            if (abs(overallMagnitude.getLastSample()-overallMagnitude.getAverage()))>5 && timeInPhase()>50 {
-                
-                let peakFundamentalFreqs = detectBestFundamentalPeaks(fft: fft)
-                
-                //hit was caused by a tonal sound
-                if peakFundamentalFreqs.count>0 {
-                    print("TONAL")
-                    startPhase(phase: NoteSessionPhase.attack, fft: fft)
-                    
-                //hit was caused by an atonal sound. ignore
-                } else {
-                    print("ATONAL")
-                }
-                
-            } else if overallMagnitude.getAverage() < 5 {
+            if overallMagnitude.getAverage() < 10 {
                 startPhase(phase: NoteSessionPhase.backgroundNoise, fft: fft)
                 self.backgroundNoise = MovingAverageBins(binCount: fft.spectrum().count, maxSamples: 16)
             }
@@ -79,7 +64,7 @@ class NoteSession {
         } else if phase == NoteSessionPhase.backgroundNoise {
             
             //high change detected. may be an attack
-            if (abs(overallMagnitude.getLastSample()-overallMagnitude.getAverage()))>5 && timeInPhase()>50 {
+            if (abs(overallMagnitude.getLastSample()-overallMagnitude.getAverage()))>3 && timeInPhase()>50 {
                 
                 let peakFundamentalFreqs = detectBestFundamentalPeaks(fft: fft)
 
@@ -142,30 +127,12 @@ class NoteSession {
             let spec = fft.maskedSpectrum(fromIndex: zoomIndexFrom, toIndex: zoomIndexTo)
             zoomedSpectrum.addSample(bins: spec)
             
-            let zoomedAverage = zoomedSpectrum.getAverage()
-//            if zoomedAverage != nil {
-//                let sumMag = zoomedAverage?.reduce(0, { (current, element) -> Double in
-//                    current + element
-//                })
-            if overallMagnitude.getAverage()<1.3 {
+            if overallMagnitude.getAverage()<0.3 {
                 print("SIGNAL TOO LOW")
                 startPhase(phase: NoteSessionPhase.release, fft: fft)
-                
-//            //high change detected. may be another attack
-//            } else if (abs(overallMagnitude.getLastSample()-overallMagnitude.getAverage()))>1000 {
-//                let peakFundamentalFreqs = detectBestFundamentalPeaks(fft: fft)
-//
-//                //hit was caused by a tonal sound
-//                if peakFundamentalFreqs.count>0 {
-//                    print("TONAL")
-//                    startPhase(phase: NoteSessionPhase.attack, fft: fft)
-//
-//                //hit was caused by an atonal sound. just ignore it
-//                } else {
-//                    print("ATONAL")
-//                }
 
             } else {
+                let zoomedAverage = zoomedSpectrum.getAverage()
                 self.zoomedTonalPeaks = FFTUtils.calculateFrequencyPeaks(spectrum: zoomedAverage!, binWidth: fft.bandwidth)
             }
             

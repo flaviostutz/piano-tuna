@@ -10,54 +10,40 @@ import Foundation
 
 class FFTUtils {
 
-    static func calculateFrequencyPeaks(spectrum: [Double], binWidth: Double, minMagnitude: Double=0.1, fromFrequency: Double! = nil, toFrequency: Double! = nil) -> [(frequency: Double, magnitude: Double)] {
+    static func calculateFrequencyPeaks(spectrum: [Double], binWidth: Double, minMagnitude: Double=0.001, fromFrequency: Double! = nil, toFrequency: Double! = nil) -> [(frequency: Double, magnitude: Double)] {
         var peakFreqs = Array<(frequency: Double, magnitude: Double)>()
-        var lastMag: Double = 0
-        var lastLastMag: Double = 0
-        var spectrumIndex = 0
+        var climbing: Bool = true
         
-        for mag in spectrum {
-            
-            var filter = mag>minMagnitude
-            if filter {
-                let currentFrequency = (binWidth * (Double(spectrumIndex)-1))
-                if fromFrequency != nil && currentFrequency<fromFrequency {
-                    filter = false
-                } else if toFrequency != nil && currentFrequency>toFrequency {
-                    filter = false
-                }
+        if spectrum.count<3 {
+            return peakFreqs
+        }
+        
+        for i in 2..<spectrum.count {
+            var filter = true
+            let currentFrequency = (binWidth * (Double(i)-1))
+            if fromFrequency != nil && currentFrequency<fromFrequency {
+                filter = false
+            } else if toFrequency != nil && currentFrequency>toFrequency {
+                filter = false
             }
             
-            //climbing peak
-            if mag>=lastMag && filter {
+            if filter &&
+               climbing &&
+               spectrum[i-1]>minMagnitude &&
+               spectrum[i]<spectrum[i-1] {
+                //calculate best frequency fit between (possible) peak elements
+                //see other methods at https://dspguru.com/dsp/howtos/how-to-interpolate-fft-peak/
 
+                //Barycentric method
+                let indexDiff: Double = (spectrum[i] - spectrum[i-2]) / (spectrum[i-2] + spectrum[i-1] + spectrum[i])
                 
-            //just after the peak
-            } else {
-                
-                if lastLastMag>0 && lastMag>0 && mag<=lastMag {
-                    
-                    //calculate best frequency fit between (possible) peak elements
-                    //see other methods at https://dspguru.com/dsp/howtos/how-to-interpolate-fft-peak/
-                    let peak1 = lastLastMag
-                    let peak2 = lastMag
-                    let peak3 = mag
-                    
-                    //Barycentric method
-                    let indexDiff: Double = (peak3 - peak1) / (peak1 + peak2 + peak3)
-                    let freqDiff = (indexDiff * binWidth)
-//                    print(freqDiff)
-                    
-                    let peakFreq = (binWidth * (Double(spectrumIndex)-1)) + freqDiff
-                    
-                    peakFreqs.append((frequency:peakFreq, magnitude:lastMag))
-                }
+                let freqDiff = (indexDiff * binWidth)
+                let peakFreq = currentFrequency + freqDiff
+                peakFreqs.append((frequency:peakFreq, magnitude:spectrum[i-1]))
             }
             
-            lastLastMag = lastMag
-            lastMag = mag
+            climbing = spectrum[i]>spectrum[i-1]
             
-            spectrumIndex = spectrumIndex+1
         }
         return peakFreqs
     }
