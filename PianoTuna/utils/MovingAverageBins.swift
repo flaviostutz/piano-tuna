@@ -11,9 +11,11 @@ import Foundation
 class MovingAverageBins {
     
     var averages: Array<MovingAverage>!
+    var maxSamples: Int!
     
     init(binCount: Int, maxSamples: Int) {
         self.averages = Array<MovingAverage>()
+        self.maxSamples = maxSamples
         for _ in 0..<binCount {
             self.averages.append(MovingAverage(numberOfSamples: maxSamples))
         }
@@ -26,7 +28,7 @@ class MovingAverageBins {
         }
     }
     
-    func getAverage() -> [Double]! {
+    func getResult() -> [Double]! {
         var result = Array<Double>()
         for average in self.averages {
             if(average.getAverage() == nil) {

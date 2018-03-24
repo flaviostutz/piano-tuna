@@ -30,7 +30,7 @@ class ScaledBandsFFT {
 
     /// Applies logical banding on top of the spectrum data. The bands are spaced linearly throughout the spectrum.
     func calculateLinearBands(minFrequency: Double, maxFrequency: Double, numberOfBands: Int) {
-        assert(fft.hasPerformedFFT, "*** Forward data to FFT first.")
+        assert(fft.magnitudes != nil, "*** Forward data to FFT first.")
 
         let actualMaxFrequency = min(fft.nyquistFrequency, maxFrequency)
         
@@ -62,7 +62,7 @@ class ScaledBandsFFT {
 
     /// Applies logical banding on top of the spectrum data. The bands are grouped by octave throughout the spectrum. Note that the actual min and max frequencies in the resulting band may be lower/higher than the minFrequency/maxFrequency because the band spectrum <i>includes</i> those frequencies but isn't necessarily bounded by them.
     func calculateLogarithmicBands(minFrequency: Double, maxFrequency: Double, bandsPerOctave: Int) {
-        assert(fft.hasPerformedFFT, "*** Forward data to FFT first.")
+        assert(fft.magnitudes != nil, "*** Forward data to FFT first.")
         
         // The max can't be any higher than the nyquist
         let actualMaxFrequency = min(fft.nyquistFrequency, maxFrequency)

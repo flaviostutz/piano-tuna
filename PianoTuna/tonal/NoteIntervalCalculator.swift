@@ -12,7 +12,9 @@ import Darwin
 class NoteIntervalCalculator {
 
     static func frequencyToNoteEqualTemperament(_ frequency: Double, referenceFrequency: Double = 440) -> (name: String, cents: Double, noteNumber: Int, noteFrequency: Double, realFrequency: Double) {
-        let lnote = (log(frequency) - log(referenceFrequency))/log(2) + 4.0
+        // ceil to 128db in order to avoid log10'ing 0
+        let freq = max(0.000000000001, frequency)
+        let lnote = (log(freq) - log(referenceFrequency))/log(2) + 4.0
         var oct = floor(lnote)
         var cents = 1200.0 * (lnote - oct)
         var note = ""
@@ -44,7 +46,7 @@ class NoteIntervalCalculator {
         noteNumber = noteNumber + (12*Int(oct))
 //        print("NOTE \(noteNumber) \(oct)")
         let noteFrequency = frequencyForNoteEqualTemperament(noteNumber: noteNumber)
-        return ( name: "\(note)\(Int(oct))".replacingOccurrences(of: " ", with: ""), cents: cents, noteFrequency: noteFrequency, noteNumber: noteNumber, realFrequency: frequency )
+        return ( name: "\(note)\(Int(oct))".replacingOccurrences(of: " ", with: ""), cents: cents, noteFrequency: noteFrequency, noteNumber: noteNumber, realFrequency: freq )
     }
     
     private static func charAt(_ str:String, _ i:Int) -> Character {

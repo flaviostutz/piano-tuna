@@ -60,7 +60,7 @@ class FFTSpectrumView: UIView {
     }
     
     private func prepareSpectrumView(_ fft: TempiFFT!) {
-        if(fft == nil) {
+        if(fft == nil || fft.spectrum() == nil) {
             return
         }
         
@@ -69,8 +69,11 @@ class FFTSpectrumView: UIView {
         let minFreq = self.zoomFromFrequency ?? 0.0
         let maxFreq = self.zoomToFrequency ?? fft.nyquistFrequency
 
+        
         var xAxisLabels = Array<String>()
-        for i in 0..<fft.magnitudes.count {
+        
+        let fftSpectrum = fft.spectrum()!
+        for i in 0..<fftSpectrum.count {
             let freq = fft.frequencyAtIndex(i)
             
             //zoom frequency
@@ -96,8 +99,8 @@ class FFTSpectrumView: UIView {
         var viewLabels = Array<String>()
         var labelsCounter = 0
 
-        for i in 0..<fft.magnitudes.count {
-            let magnitude = fft.magnitudes[i]
+        for i in 0..<fftSpectrum.count {
+            let magnitude = fftSpectrum[i]
             // Incoming magnitudes are linear, making it impossible to see very low or very high values. Decibels to the rescue!
             var magnitudeDB = FFTUtils.toDB(magnitude)
             magnitudeDB = max(0, magnitudeDB + abs(minDB))

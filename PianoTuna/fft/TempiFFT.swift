@@ -38,11 +38,10 @@ import Accelerate
     case none
     case hanning
     case hamming
+    case gaussian
 }
 
 @objc class TempiFFT : NSObject {
-
-    var hasPerformedFFT: Bool = false
 
     /// The length of the sample buffer we'll be analyzing.
     private(set) var size: Int
@@ -68,7 +67,7 @@ import Accelerate
     }
     
     /// Supplying a window type (hanning or hamming) smooths the edges of the incoming waveform and reduces output errors from the FFT function (aka "spectral leakage" - ewww).
-    var windowType = TempiFFTWindowType.hanning
+    var windowType = TempiFFTWindowType.none
     
     private var halfSize:Int
     private var log2Size:Int
@@ -109,7 +108,7 @@ import Accelerate
     
     /// Perform a forward FFT on the provided single-channel audio data. When complete, the instance can be queried for information about the analysis or the magnitudes can be accessed directly.
     /// - Parameter inMonoBuffer: Audio data in mono format
-    func fftForward(_ inMonoBuffer:[Double]) {
+    func fftForward(_ inMonoBuffer:[Double], useLogScale: Bool = false) {
         var analysisBuffer = inMonoBuffer
         
         // If we have a window, apply it now. Since 99.9% of the time the window array will be exactly the same, an optimization would be to create it once and cache it, possibly caching it by size.
@@ -123,6 +122,8 @@ import Accelerate
                     vDSP_hamm_windowD(&self.window!, UInt(size), 0)
                 case .hanning:
                     vDSP_hann_windowD(&self.window!, UInt(size), Int32(vDSP_HANN_NORM))
+                case .gaussian:
+                    self.window = FFTUtils.gaussianWindow(windowSize: size, sigma: 4)
                 default:
                     break
                 }
@@ -167,10 +168,15 @@ import Accelerate
         self.magnitudes = [Double](repeating: 0.0, count: self.halfSize)
         vDSP_zvmagsD(&(self.complexBuffer!), 1, &self.magnitudes!, 1, UInt(self.halfSize))
         
+        //put in natural log scale
+        if useLogScale {
+            for i in 0..<self.magnitudes.count {
+                self.magnitudes[i] = log(self.magnitudes[i])
+            }
+        }
+        
         //show info
         print("bins:\(magnitudes.count) binWidth:\(self.nyquistFrequency/Double(self.magnitudes.count))Hz; maxFrequency:\(self.nyquistFrequency)Hz")
-        
-        self.hasPerformedFFT = true
     }
     
     func magIndexForFreq(_ freq: Double) -> Int {
@@ -206,7 +212,7 @@ import Accelerate
     /// - Parameter inFrequency: The requested frequency. Must be less than the Nyquist frequency (```sampleRate/2```).
     /// - Returns: A magnitude.
     func magnitudeAtFrequency(_ inFrequency: Double) -> Double {
-        assert(hasPerformedFFT, "*** Perform the FFT first.")
+        assert(self.magnitudes != nil, "*** Perform the FFT first.")
         let index = Int(floor(inFrequency / self.bandwidth ))
         return self.magnitudes[min(index, self.magnitudes.count-1)]
     }
@@ -268,7 +274,7 @@ import Accelerate
         return result
     }
     
-    func spectrum() -> [Double] {
+    func spectrum() -> [Double]! {
         return self.magnitudes
     }
     

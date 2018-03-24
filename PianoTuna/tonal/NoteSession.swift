@@ -33,7 +33,7 @@ class NoteSession {
     var phase = NoteSessionPhase.release
     var phaseStart = Date()
     
-    var backgroundNoise: MovingAverageBins!
+    var backgroundNoise: LinearRegressionBins!
     var overallMagnitude = MovingAverage(numberOfSamples:4)
     
     var detectedNote: (name: String, cents: Double, noteFrequency: Double, noteNumber: Int, realFrequency: Double)!
@@ -44,27 +44,31 @@ class NoteSession {
     var fft: TempiFFT!
 
     func step(fft: TempiFFT) {
+        
+        if fft.spectrum() == nil {
+            return
+        }
 
         overallMagnitude.addSample(value: fft.sumMagnitudes(lowFreq: 0, highFreq: fft.nyquistFrequency, useDB: false))
-        print("Level=\(overallMagnitude.getAverage())")
+//        print("Level=\(overallMagnitude.getAverage())")
 
         //wait for calmness
         if phase == NoteSessionPhase.release {
             self.detectedNote = nil
             self.zoomedTonalPeaks = nil
-            self.zoomFrequencyFrom = nil
-            self.zoomFrequencyTo = nil
+            self.zoomFrequencyFrom = 0
+            self.zoomFrequencyTo = 2000
             
-            if overallMagnitude.getAverage() < 10 {
+            if overallMagnitude.getAverage() < Double(fft.spectrum().count/10) {
                 startPhase(phase: NoteSessionPhase.backgroundNoise, fft: fft)
-                self.backgroundNoise = MovingAverageBins(binCount: fft.spectrum().count, maxSamples: 16)
+                self.backgroundNoise = LinearRegressionBins(binCount: fft.spectrum().count, maxSamples: 16)
             }
 
         //measure background noise
         } else if phase == NoteSessionPhase.backgroundNoise {
             
             //high change detected. may be an attack
-            if (abs(overallMagnitude.getLastSample()-overallMagnitude.getAverage()))>3 && timeInPhase()>50 {
+            if (abs(overallMagnitude.getLastSample()-overallMagnitude.getAverage()))>Double(fft.spectrum().count/1000) && timeInPhase()>100 {
                 
                 let peakFundamentalFreqs = detectBestFundamentalPeaks(fft: fft)
 
@@ -88,7 +92,7 @@ class NoteSession {
             //remove measured background noise
             var backgroundNoiseAvg: [Double]!
             if self.backgroundNoise != nil {
-                backgroundNoiseAvg = self.backgroundNoise.getAverage()
+                backgroundNoiseAvg = self.backgroundNoise.getResult()
             }
             if backgroundNoiseAvg == nil {
                 print("NO BACKGROUND NOISE")
@@ -97,7 +101,7 @@ class NoteSession {
             } else {
 //                fft.subtractMagnitude(backgroundNoiseAvg!)
                 
-                if timeInPhase()>100 {
+                if timeInPhase()>10 {
                     let bestPeaks = detectBestFundamentalPeaks(fft: fft)
                     
                     if bestPeaks.count == 0 {
@@ -111,7 +115,10 @@ class NoteSession {
                         let diff = NoteIntervalCalculator.frequencyFromCents(baseFrequency: self.detectedNote.realFrequency, cents: self.zoomCents) - self.detectedNote.realFrequency
                         self.zoomFrequencyFrom = max(0, self.detectedNote.noteFrequency - diff)
                         self.zoomFrequencyTo = min(fft.nyquistFrequency, self.detectedNote.noteFrequency + diff)
-                        self.zoomedSpectrum = MovingAverageBins(binCount: fft.magnitudes.count, maxSamples: 16)
+                        //TIP: increment max samples as background noise is most impredictable. this must be related to sampling frequency for felling too
+                        //32 with 24k@2048 - limit beating detection to 3/s
+                        //32 with 44.1k@2048 - limit beating detection to 4.5/s
+                        self.zoomedSpectrum = MovingAverageBins(binCount: fft.magnitudes.count, maxSamples: 1)
                         startPhase(phase: NoteSessionPhase.decay, fft: fft)
                     }
                 }
@@ -127,15 +134,17 @@ class NoteSession {
             let spec = fft.maskedSpectrum(fromIndex: zoomIndexFrom, toIndex: zoomIndexTo)
             zoomedSpectrum.addSample(bins: spec)
             
-            if overallMagnitude.getAverage()<0.3 {
+            if overallMagnitude.getAverage()<Double(fft.spectrum().count/40) {
                 print("SIGNAL TOO LOW")
                 startPhase(phase: NoteSessionPhase.release, fft: fft)
 
             } else {
-                let zoomedAverage = zoomedSpectrum.getAverage()
-                self.zoomedTonalPeaks = FFTUtils.calculateFrequencyPeaks(spectrum: zoomedAverage!, binWidth: fft.bandwidth)
+                let zoomedAverage = zoomedSpectrum.getResult()
+                let tonalPeaks = FFTUtils.calculateFrequencyPeaks(spectrum: zoomedAverage!, binWidth: fft.bandwidth)
+                self.zoomedTonalPeaks = tonalPeaks.sorted(by: { (peak1, peak2) -> Bool in
+                    return peak1.magnitude>peak2.magnitude
+                })
             }
-            
         }
         
         self.fft = fft
@@ -143,7 +152,7 @@ class NoteSession {
     
     private func detectBestFundamentalPeaks(fft: TempiFFT) -> [(frequency: Double, score: Double, magnitude: Double)] {
         //detect which tonal sound we are looking for
-        let peakFundamentalFreqs = PitchAnalyser.detectFundamentalFrequencies(fft: fft, harmonics:4, minMagnitude:0.1)
+        let peakFundamentalFreqs = PitchAnalyser.detectFundamentalFrequencies(fft: fft, harmonics:3, minMagnitude:0.01)
         let peakFundamentalFreqsFiltered = peakFundamentalFreqs.filter { (peak) -> Bool in
             return peak.score > 1
         }
