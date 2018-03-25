@@ -118,7 +118,7 @@ class NoteSession {
                         //TIP: increment max samples as background noise is most impredictable. this must be related to sampling frequency for felling too
                         //32 with 24k@2048 - limit beating detection to 3/s
                         //32 with 44.1k@2048 - limit beating detection to 4.5/s
-                        self.zoomedSpectrum = MovingAverageBins(binCount: fft.magnitudes.count, maxSamples: 1)
+                        self.zoomedSpectrum = MovingAverageBins(binCount: fft.magnitudes.count, maxSamples: 4)
                         startPhase(phase: NoteSessionPhase.decay, fft: fft)
                     }
                 }
@@ -163,7 +163,7 @@ class NoteSession {
     }
     
     private func startPhase(phase: NoteSessionPhase, fft: TempiFFT) {
-        print("PHASE \(phase)")
+        print("PHASE new \(phase) t \(timeInPhase())")
         self.phase = phase
         self.phaseStart = Date()
     }

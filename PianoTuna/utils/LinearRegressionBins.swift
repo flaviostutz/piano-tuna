@@ -13,7 +13,7 @@ class LinearRegressionBins {
     var regressions: Array<LinearRegression>!
     var maxSamples: Int!
     
-    var lastResult: [Double]!
+//    var lastResult: [Double]!
     
     init(binCount: Int, maxSamples: Int) {
         self.regressions = Array<LinearRegression>()
@@ -28,23 +28,20 @@ class LinearRegressionBins {
         for i in 0..<bins.count {
             self.regressions[i].addSample(y: bins[i])
         }
-        self.lastResult = nil
+//        self.lastResult = nil
     }
     
     func getResult() -> [Double]! {
-        if self.lastResult == nil {
-            self.lastResult = Array<Double>()
-            for regression in self.regressions {
-                let r = regression.calculateBestYValue()
-                if(r == nil) {
-                    self.lastResult = nil
-                    break
-                } else {
-                    self.lastResult.append(r!)
-                }
+        var lastResult = Array<Double>()
+        for regression in self.regressions {
+            let r = regression.calculateBestYValue()
+            if(r == nil) {
+                return nil
+            } else {
+                lastResult.append(r!)
             }
         }
-        return self.lastResult
+        return lastResult
     }
     
 }

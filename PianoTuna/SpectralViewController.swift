@@ -22,8 +22,9 @@ class SpectralViewController: UIViewController {
     //best frequency measurements precision: 44100@8192samples (5Hz FFT)
     let fftSampleRate: Double = 44100//piano max frequency is 8kHz
     let fftSize: Int = 2048*4 //2048 7.8125Hz/bin
+    let fftOverlapRatio: Double = 0.0
     
-    var drawTimedBoolean = TimedBoolean(time: 1000/10)
+    var drawTimedBoolean = TimedBoolean(time: 1000/5)
 
     var noteSession = NoteSession()
 
@@ -55,8 +56,8 @@ class SpectralViewController: UIViewController {
         self.fftSpectrumView.title = "Raw spectrum"
 //        self.fftSpectrumView.zoomMinDB =
 //        self.fftSpectrumView.zoomMaxDB =
-//        self.fftSpectrumView.zoomFromFrequency = 0
-//        self.fftSpectrumView.zoomToFrequency = 2000
+        self.fftSpectrumView.zoomFromFrequency = 0
+        self.fftSpectrumView.zoomToFrequency = 2000
         
         
         //draw hps spectrum
@@ -76,7 +77,7 @@ class SpectralViewController: UIViewController {
 //        var circularSamplesBuffer = CircularArray<Double>()
         self.drawTimedBoolean.reset()
         
-        self.fftLoader = FFTLoader(sampleRate: self.fftSampleRate, samplesSize: fftSize)
+        self.fftLoader = FFTLoader(sampleRate: self.fftSampleRate, samplesSize: fftSize, overlapRatio: fftOverlapRatio)
         
         let audioInputCallback: TempiAudioInputCallback = { (timeStamp, numberOfFrames, samples) -> Void in
             let dsamples = samples.map({ (element) -> Double in

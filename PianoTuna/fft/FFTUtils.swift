@@ -34,21 +34,27 @@ class FFTUtils {
                 //calculate best frequency fit between (possible) peak elements
                 //see other methods at https://dspguru.com/dsp/howtos/how-to-interpolate-fft-peak/
 
-                //Barycentric method
-//                let indexDiff: Double = (spectrum[i] - spectrum[i-2]) / (spectrum[i-2] + spectrum[i-1] + spectrum[i])
-                
-                //Gaussian interpolation
                 let max_bin = i-1
-                let indexDiff = log(log(spectrum[max_bin+1])/log(spectrum[max_bin-1]))*0.5/log(log(spectrum[max_bin])*log(spectrum[max_bin])/(log(spectrum[max_bin+1])*log(spectrum[max_bin-1])))
-//                let indexDiff = log(spectrum[max_bin+1]/spectrum[max_bin-1])*0.5/log(spectrum[max_bin]*spectrum[max_bin]/(spectrum[max_bin+1]*spectrum[max_bin-1]))
+                let s0 = log(spectrum[max_bin-1])
+                let s1 = log(spectrum[max_bin])
+                let s2 = log(spectrum[max_bin+1])
+
+                //Barycentric method
+//                let indexDiff: Double = (s2 - s0) / (s0 + s1 + s2)
+
+                //Gaussian interpolation
+//                let indexDiff = log(s2/s0)*0.5/log(s1*s1/(s2*s0))
+
+                //Quadratic interpolation
+                let indexDiff = (1/2) * ((s0-s2)/(s0 - 2*s1 + s2))
+                
                 if !indexDiff.isNaN {
                     let freqDiff = (indexDiff * binWidth)
                     let peakFreq = currentFrequency + freqDiff
                     peakFreqs.append((frequency:peakFreq, magnitude:spectrum[i-1]))
                 } else {
-                    print("NOT A NUMBER FOUND!")
+//                    print("NOT A NUMBER FOUND!")
                 }
-
             }
             
             climbing = spectrum[i]>spectrum[i-1]
