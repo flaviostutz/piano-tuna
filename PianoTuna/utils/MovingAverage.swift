@@ -10,6 +10,12 @@ import Foundation
 
 class MovingAverage {
     
+    var count: Int {
+        get {
+            return self.samples.count
+        }
+    }
+    
     var samples: CircularArray<Double>!
 
     //avoid recalculating results that are already known

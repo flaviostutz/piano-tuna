@@ -132,19 +132,19 @@ class SpectralViewController: UIViewController {
             self.fftSpectrumView.zoomFromFrequency = noteSession.zoomFrequencyFrom
             self.fftSpectrumView.zoomToFrequency = noteSession.zoomFrequencyTo
             
-            //        self.hpsSpectrumView.annotations = []
-            //        if peakFundamentalFreqsSorted.count>0 {
-            //            let peak = peakFundamentalFreqsSorted[0]
-            //            let note = NoteIntervalCalculator.frequencyToNoteEqualTemperament(peak.frequency)
-            //            print("detection=\(note.name) \(String(format: "%.1f", note.cents))¢ \(peak.frequency)Hz")
-            //            self.hpsSpectrumView.annotations.append((text:"\(note.name) \(String(format: "%.1f", note.cents))¢", x:100, y:100))
-            //
-            //            let harmonics = Inharmonicity.calculateInharmonicity(fft: fft, fundamentalFrequency: peak.frequency)
-            //            for i in 0..<harmonics.count {
-            //                let harm = harmonics[i]
-            //                self.hpsSpectrumView.annotations.append((text:"\(harm.number): \(harm.idealFrequency) (\(harm.measuredFrequency)) \(String(format:"%.2f", harm.inharmonicityIndex*100))%", x: 300, y: Double(20+(i*20))))
-            //            }
-            //        }
+            self.hpsSpectrumView.annotations = []
+            if noteSession.zoomedTonalPeaks != nil && noteSession.zoomedTonalPeaks!.count>0 {
+                let peak = noteSession.zoomedTonalPeaks[0]
+                let note = NoteIntervalCalculator.frequencyToNoteEqualTemperament(peak.frequency)
+//                print("detection=\(note.name) \(String(format: "%.1f", note.cents))¢ \(peak.frequency)Hz")
+                self.hpsSpectrumView.annotations.append((text:"\(note.name) \(String(format: "%.1f", note.cents))¢", x:100, y:100))
+    
+                let harmonics = Inharmonicity.calculateInharmonicity(fft: noteSession.fft, fundamentalFrequency: peak.frequency)
+                for i in 0..<harmonics.count {
+                    let harm = harmonics[i]
+                    self.hpsSpectrumView.annotations.append((text:"\(harm.number): \(harm.idealFrequency) (\(harm.measuredFrequency)) \(String(format:"%.2f", harm.inharmonicityIndex*100))%", x: 300, y: Float(20+(i*20))))
+                }
+            }
             
             var bgbins: [Double]!
             if noteSession.backgroundNoise != nil {

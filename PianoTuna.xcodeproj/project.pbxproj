@@ -51,7 +51,7 @@
 		7C563012205C9C38003111CF /* ScaledBandsFFT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaledBandsFFT.swift; sourceTree = "<group>"; };
 		7C5F721F205F45FC003DBE84 /* NoteIntervalCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteIntervalCalculator.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		7CB9237E20585D5B0078486E /* Tests.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Tests.storyboard; sourceTree = "<group>"; };
-		7CBE8CAB2063347C0081D69A /* LinearRegression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearRegression.swift; sourceTree = "<group>"; };
+		7CBE8CAB2063347C0081D69A /* LinearRegression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearRegression.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		7CBE8CAD206343800081D69A /* FFTLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFTLoader.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		7CBE8CAF2063499D0081D69A /* LinearRegressionBins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearRegressionBins.swift; sourceTree = "<group>"; };
 		7CCFE75420636C5E0017D2AD /* FrequencyMeasure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrequencyMeasure.swift; sourceTree = "<group>"; };

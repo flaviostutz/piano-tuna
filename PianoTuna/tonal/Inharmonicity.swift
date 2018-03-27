@@ -25,7 +25,7 @@ class Inharmonicity {
                     harmonics.append((number:i, idealFrequency:idealFrequency, measuredFrequency:peaks[0].frequency, magnitude:peaks[0].magnitude, inharmonicityIndex:inharmonicityIndex))
                     if peaks.count>1 {
                         print("[WARNING] found more than one peak in inharmonicity analysis for a single overtone")
-                        print(peaks)
+//                        print(peaks)
                     }
                 }
             }
