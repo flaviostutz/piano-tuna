@@ -17,6 +17,7 @@ class FFTLoader {
     private var sampleRate: Double!
     private var overlapRatio: Double!
     private var processedSamplesCount: Int = 0
+    var lastBufferSamples: [Double]!
     
     let forwardFrequency = FrequencyMeasure()
     
@@ -33,13 +34,13 @@ class FFTLoader {
             self.buffer.append(s)
             self.processedSamplesCount = self.processedSamplesCount + 1
             if (self.buffer.count >= self.samplesSize) && (self.processedSamplesCount >= Int(Double(self.samplesSize)*(1-self.overlapRatio))) {
-                let bufferSamples = self.buffer.map({ (element) -> Double in
+                self.lastBufferSamples = self.buffer.map({ (element) -> Double in
                     return element
                 })
                 let fft = TempiFFT(withSize: self.samplesSize, sampleRate: self.sampleRate)
                 fft.windowType = TempiFFTWindowType.gaussian
-                print("buffer samples \(bufferSamples.count)")
-                fft.fftForward(bufferSamples)
+                print("buffer samples \(self.lastBufferSamples.count)")
+                fft.fftForward(self.lastBufferSamples)
                 forwardFrequency.tick()
 //                self.buffer.removeAll(keepingCapacity: false)
                 self.processedSamplesCount = 0

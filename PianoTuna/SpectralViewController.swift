@@ -20,16 +20,15 @@ class SpectralViewController: UIViewController {
 
     //PARAMETERS
     //best frequency measurements precision: 44100@8192samples (5Hz FFT)
-    let fftSampleRate: Double = 44100//piano max frequency is 8kHz
-    let fftSize: Int = 2048*4 //2048 7.8125Hz/bin
+    let fftSampleRate: Double = 8000//piano max frequency is 8kHz
+    let fftSize: Int = 2048 //2048 7.8125Hz/bin
     let fftOverlapRatio: Double = 0.0
     
     var drawTimedBoolean = TimedBoolean(time: 1000/5)
-    var waveletTimedBoolean = TimedBoolean(time: 3000)
+    var waveletTimedBoolean = TimedBoolean(time: 1000)
 
     var noteSession = NoteSession()
-    var lastSignalSamples: [Double]!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -68,8 +67,8 @@ class SpectralViewController: UIViewController {
         self.hpsSpectrumView.barColor = UIColor.red.cgColor
         self.hpsSpectrumView.minX = 0
 //        self.hpsSpectrumView.maxX = 256
-        self.hpsSpectrumView.minY = -1
-        self.hpsSpectrumView.maxY = 1
+        self.hpsSpectrumView.minY = -0.1
+        self.hpsSpectrumView.maxY = 0.1
 //        let morlet = Morlet(sampleRate:self.fftSampleRate, size:Int(self.fftSampleRate*(3.0/30.0)))//"size of 3 samples of a 30Hz signal"
 //        self.hpsSpectrumView.data = morlet.filter(frequency: searchFrequency).map({ (v) -> Double in
 //            return v.real
@@ -89,10 +88,10 @@ class SpectralViewController: UIViewController {
         self.fftLoader = FFTLoader(sampleRate: self.fftSampleRate, samplesSize: fftSize, overlapRatio: fftOverlapRatio)
         
         let audioInputCallback: TempiAudioInputCallback = { (timeStamp, numberOfFrames, samples) -> Void in
-            self.lastSignalSamples = samples.map({ (element) -> Double in
+            let signalSamples = samples.map({ (element) -> Double in
                 return Double(element)
             })
-            let fft = self.fftLoader.addSamples(samples: self.lastSignalSamples)
+            let fft = self.fftLoader.addSamples(samples: signalSamples)
             if fft != nil {
                 self.noteSession.step(fft: fft!)
             }
@@ -164,12 +163,12 @@ class SpectralViewController: UIViewController {
 
             if self.waveletTimedBoolean.checkTrue() {
                 let morlet = Morlet(sampleRate:self.fftSampleRate)
-                let signal = self.lastSignalSamples[...100]
-                let convoluted = morlet.convolve(signal: Array(signal), frequency: 10.0)
-                print(convoluted)
-//            self.hpsSpectrumView.data = convoluted.map({ (s) -> Double in
-//                s.real
-//            })
+                let signal = self.fftLoader.lastBufferSamples[...2040]
+                let convoluted = morlet.convolve(signal: Array(signal), frequency: 144.0)
+                print("\(signal.count) \(convoluted.count) \(convoluted.max()!) \(morlet.filter(frequency: 100.0).count)")
+                self.hpsSpectrumView.annotations = [(text:"\(convoluted.max()!)", x:150, y:150)]
+                self.hpsSpectrumView.data = convoluted
+//                print(convoluted)
             }
         }
     }
