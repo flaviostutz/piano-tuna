@@ -13,11 +13,11 @@ class PitchAnalyser {
     static func detectFundamentalFrequencies(fft: TempiFFT, harmonics: Int=4, minMagnitude: Double=0.1) -> [(frequency: Double, score: Double, magnitude: Double)] {
         //apply HPS
         let hpsSpectrum = calculateHPSSpectrum(spectrum: fft.spectrum(), harmonics: harmonics)
-        let hpsPeaks = FFTUtils.calculateFrequencyPeaks(spectrum: hpsSpectrum, binWidth: fft.bandwidth, minMagnitude: minMagnitude)
+        let hpsPeaks = MathUtils.calculateFrequencyPeaks(spectrum: hpsSpectrum, binWidth: fft.bandwidth, minMagnitude: minMagnitude)
 
         let peakFundamentalFreqsScore = hpsPeaks.map { (peak) -> (frequency: Double, score: Double, magnitude: Double) in
             //get fundamental frequency in raw spectrum related to HPS detection
-            let fp = FFTUtils.calculateFrequencyPeaks(spectrum: fft.spectrum(), binWidth: fft.bandwidth)
+            let fp = MathUtils.calculateFrequencyPeaks(spectrum: fft.spectrum(), binWidth: fft.bandwidth)
             let closest = fp.sorted(by: { (elem1, elem2) -> Bool in
                 return abs(elem1.frequency-peak.frequency)<abs(elem2.frequency-peak.frequency)
             })
@@ -49,7 +49,7 @@ class PitchAnalyser {
             if freq >= currentOvertone + (fundamentalFrequency/2) {
                 currentOvertone = currentOvertone + fundamentalFrequency
             }
-            mask.append(FFTUtils.valuesNearRatio(value1:freq, value2:currentOvertone, zeroDiff:fundamentalFrequency/4))
+            mask.append(MathUtils.valuesNearRatio(value1:freq, value2:currentOvertone, zeroDiff:fundamentalFrequency/4))
             freq = freq + binWidth
         }
         //        print(mask)

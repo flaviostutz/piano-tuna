@@ -102,7 +102,7 @@ class FFTSpectrumView: UIView {
         for i in 0..<fftSpectrum.count {
             let magnitude = fftSpectrum[i]
             // Incoming magnitudes are linear, making it impossible to see very low or very high values. Decibels to the rescue!
-            var magnitudeDB = FFTUtils.toDB(magnitude)
+            var magnitudeDB = MathUtils.toDB(magnitude)
             magnitudeDB = max(0, magnitudeDB + abs(minDB))
             spectrum.append(magnitudeDB)
 

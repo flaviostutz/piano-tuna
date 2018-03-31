@@ -25,8 +25,10 @@ class SpectralViewController: UIViewController {
     let fftOverlapRatio: Double = 0.0
     
     var drawTimedBoolean = TimedBoolean(time: 1000/5)
+    var waveletTimedBoolean = TimedBoolean(time: 3000)
 
     var noteSession = NoteSession()
+    var lastSignalSamples: [Double]!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -66,7 +68,13 @@ class SpectralViewController: UIViewController {
         self.hpsSpectrumView.barColor = UIColor.red.cgColor
         self.hpsSpectrumView.minX = 0
 //        self.hpsSpectrumView.maxX = 256
-
+        self.hpsSpectrumView.minY = -1
+        self.hpsSpectrumView.maxY = 1
+//        let morlet = Morlet(sampleRate:self.fftSampleRate, size:Int(self.fftSampleRate*(3.0/30.0)))//"size of 3 samples of a 30Hz signal"
+//        self.hpsSpectrumView.data = morlet.filter(frequency: searchFrequency).map({ (v) -> Double in
+//            return v.real
+//        })
+        
         //prepare main vertical layout
         let verticalLayout = VerticalLayoutView(width:view.bounds.width)
         verticalLayout.addSubview(fftSpectrumView)
@@ -76,14 +84,15 @@ class SpectralViewController: UIViewController {
         //initialize sound analysis
 //        var circularSamplesBuffer = CircularArray<Double>()
         self.drawTimedBoolean.reset()
+        self.waveletTimedBoolean.reset()
         
         self.fftLoader = FFTLoader(sampleRate: self.fftSampleRate, samplesSize: fftSize, overlapRatio: fftOverlapRatio)
         
         let audioInputCallback: TempiAudioInputCallback = { (timeStamp, numberOfFrames, samples) -> Void in
-            let dsamples = samples.map({ (element) -> Double in
+            self.lastSignalSamples = samples.map({ (element) -> Double in
                 return Double(element)
             })
-            let fft = self.fftLoader.addSamples(samples: dsamples)
+            let fft = self.fftLoader.addSamples(samples: self.lastSignalSamples)
             if fft != nil {
                 self.noteSession.step(fft: fft!)
             }
@@ -145,16 +154,23 @@ class SpectralViewController: UIViewController {
                     self.hpsSpectrumView.annotations.append((text:"\(harm.number): \(harm.idealFrequency) (\(harm.measuredFrequency)) \(String(format:"%.2f", harm.inharmonicityIndex*100))%", x: 300, y: Float(20+(i*20))))
                 }
             }
-            
-            var bgbins: [Double]!
-            if noteSession.backgroundNoise != nil {
-                bgbins = noteSession.backgroundNoise.getResult()
-            }
-            
-            bgbins = FFTUtils.gaussianWindow(windowSize: 100, sigma: 6)
-
             self.fftSpectrumView.fft = noteSession.fft
-            self.hpsSpectrumView.data = bgbins
+
+//            var bgbins: [Double]!
+//            if noteSession.backgroundNoise != nil {
+//                bgbins = noteSession.backgroundNoise.getResult()
+//            }
+//            bgbins = MathUtils.gaussianWindow(windowSize: 100, sigma: 6)
+
+            if self.waveletTimedBoolean.checkTrue() {
+                let morlet = Morlet(sampleRate:self.fftSampleRate)
+                let signal = self.lastSignalSamples[...100]
+                let convoluted = morlet.convolve(signal: Array(signal), frequency: 10.0)
+                print(convoluted)
+//            self.hpsSpectrumView.data = convoluted.map({ (s) -> Double in
+//                s.real
+//            })
+            }
         }
     }
     

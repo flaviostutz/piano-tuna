@@ -145,7 +145,7 @@ class NoteSession {
 
             } else {
                 let zoomedAverage = zoomedSpectrum.getResult()
-                let tonalPeaks = FFTUtils.calculateFrequencyPeaks(spectrum: zoomedAverage!, binWidth: fft.bandwidth)
+                let tonalPeaks = MathUtils.calculateFrequencyPeaks(spectrum: zoomedAverage!, binWidth: fft.bandwidth)
                 self.zoomedTonalPeaks = tonalPeaks.sorted(by: { (peak1, peak2) -> Bool in
                     return peak1.magnitude>peak2.magnitude
                 })

@@ -123,7 +123,7 @@ import Accelerate
                 case .hanning:
                     vDSP_hann_windowD(&self.window!, UInt(size), Int32(vDSP_HANN_NORM))
                 case .gaussian:
-                    self.window = FFTUtils.gaussianWindow(windowSize: size, sigma: 4)
+                    self.window = MathUtils.gaussianWindow(windowSize: size, sigma: 4)
                 default:
                     break
                 }
@@ -238,7 +238,7 @@ import Accelerate
         while curFreq <= highFreq {
             var mag = magnitudeAtFrequency(curFreq)
             if (useDB) {
-                mag = max(0, FFTUtils.toDB(mag))
+                mag = max(0, MathUtils.toDB(mag))
             }
             total += mag
             curFreq += self.bandwidth

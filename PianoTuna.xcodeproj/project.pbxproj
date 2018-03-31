@@ -16,7 +16,6 @@
 		7C51A76220587324006A9E1D /* BaseTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C51A76120587324006A9E1D /* BaseTabBarController.swift */; };
 		7C51A76420589194006A9E1D /* CircularArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C51A76320589194006A9E1D /* CircularArray.swift */; };
 		7C56300D205BE839003111CF /* VerticalLayoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C56300C205BE839003111CF /* VerticalLayoutView.swift */; };
-		7C563011205C8561003111CF /* FFTUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C563010205C8561003111CF /* FFTUtils.swift */; };
 		7C563013205C9C38003111CF /* ScaledBandsFFT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C563012205C9C38003111CF /* ScaledBandsFFT.swift */; };
 		7C5F7220205F45FC003DBE84 /* NoteIntervalCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C5F721F205F45FC003DBE84 /* NoteIntervalCalculator.swift */; };
 		7C5F7222205F70E6003DBE84 /* HistogramView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CD8D2F0205BBF31008F95A1 /* HistogramView.swift */; };
@@ -28,6 +27,11 @@
 		7CCFE75520636C5E0017D2AD /* FrequencyMeasure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCFE75420636C5E0017D2AD /* FrequencyMeasure.swift */; };
 		7CCFE757206457150017D2AD /* Examples.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCFE756206457150017D2AD /* Examples.swift */; };
 		7CCFE7592064642E0017D2AD /* MicInputExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCFE7582064642E0017D2AD /* MicInputExtractor.swift */; };
+		7CCFE75C206B5DF50017D2AD /* Morlet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCFE75B206B5DF50017D2AD /* Morlet.swift */; };
+		7CCFE75E206B5E020017D2AD /* WaveletTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCFE75D206B5E020017D2AD /* WaveletTransform.swift */; };
+		7CCFE760206BEDDB0017D2AD /* MathUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCFE75F206BEDDB0017D2AD /* MathUtils.swift */; };
+		7CCFE762206CF9EE0017D2AD /* Complex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCFE761206CF9EE0017D2AD /* Complex.swift */; };
+		7CCFE764206CFA190017D2AD /* ComplexOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCFE763206CFA190017D2AD /* ComplexOperator.swift */; };
 		7CD8D2EB2058B7EE008F95A1 /* PitchAnalyser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CD8D2EA2058B7EE008F95A1 /* PitchAnalyser.swift */; };
 		EF7009141C3ED07100E75ECF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7009131C3ED07100E75ECF /* AppDelegate.swift */; };
 		EF7009161C3ED07100E75ECF /* SpectralViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF7009151C3ED07100E75ECF /* SpectralViewController.swift */; };
@@ -47,7 +51,6 @@
 		7C51A76320589194006A9E1D /* CircularArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularArray.swift; sourceTree = "<group>"; };
 		7C56300C205BE839003111CF /* VerticalLayoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalLayoutView.swift; sourceTree = "<group>"; };
 		7C56300E205BEE74003111CF /* FFTSpectrumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFTSpectrumView.swift; sourceTree = "<group>"; wrapsLines = 0; };
-		7C563010205C8561003111CF /* FFTUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFTUtils.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		7C563012205C9C38003111CF /* ScaledBandsFFT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaledBandsFFT.swift; sourceTree = "<group>"; };
 		7C5F721F205F45FC003DBE84 /* NoteIntervalCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteIntervalCalculator.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		7CB9237E20585D5B0078486E /* Tests.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Tests.storyboard; sourceTree = "<group>"; };
@@ -57,6 +60,11 @@
 		7CCFE75420636C5E0017D2AD /* FrequencyMeasure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrequencyMeasure.swift; sourceTree = "<group>"; };
 		7CCFE756206457150017D2AD /* Examples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Examples.swift; sourceTree = "<group>"; };
 		7CCFE7582064642E0017D2AD /* MicInputExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicInputExtractor.swift; sourceTree = "<group>"; };
+		7CCFE75B206B5DF50017D2AD /* Morlet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Morlet.swift; sourceTree = "<group>"; wrapsLines = 0; };
+		7CCFE75D206B5E020017D2AD /* WaveletTransform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveletTransform.swift; sourceTree = "<group>"; wrapsLines = 0; };
+		7CCFE75F206BEDDB0017D2AD /* MathUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathUtils.swift; sourceTree = "<group>"; wrapsLines = 0; };
+		7CCFE761206CF9EE0017D2AD /* Complex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Complex.swift; sourceTree = "<group>"; };
+		7CCFE763206CFA190017D2AD /* ComplexOperator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplexOperator.swift; sourceTree = "<group>"; };
 		7CD8D2EA2058B7EE008F95A1 /* PitchAnalyser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PitchAnalyser.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		7CD8D2F0205BBF31008F95A1 /* HistogramView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistogramView.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		EF7009101C3ED07100E75ECF /* PianoTuna.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PianoTuna.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -103,12 +111,20 @@
 			path = ui;
 			sourceTree = "<group>";
 		};
+		7CCFE75A206A65220017D2AD /* wavelets */ = {
+			isa = PBXGroup;
+			children = (
+				7CCFE75B206B5DF50017D2AD /* Morlet.swift */,
+				7CCFE75D206B5E020017D2AD /* WaveletTransform.swift */,
+			);
+			path = wavelets;
+			sourceTree = "<group>";
+		};
 		7CD8D2EC2058C98E008F95A1 /* fft */ = {
 			isa = PBXGroup;
 			children = (
 				EF7009291C3EDFB900E75ECF /* TempiAudioInput.swift */,
 				EFAC3F471C45C719002CD63F /* TempiFFT.swift */,
-				7C563010205C8561003111CF /* FFTUtils.swift */,
 				7C563012205C9C38003111CF /* ScaledBandsFFT.swift */,
 				7CBE8CAD206343800081D69A /* FFTLoader.swift */,
 				7CCFE756206457150017D2AD /* Examples.swift */,
@@ -127,6 +143,9 @@
 				7C4DD48C206000330011AB36 /* MovingAverage.swift */,
 				7C4DD48E206182CE0011AB36 /* TimedBoolean.swift */,
 				7CCFE75420636C5E0017D2AD /* FrequencyMeasure.swift */,
+				7CCFE75F206BEDDB0017D2AD /* MathUtils.swift */,
+				7CCFE761206CF9EE0017D2AD /* Complex.swift */,
+				7CCFE763206CFA190017D2AD /* ComplexOperator.swift */,
 			);
 			path = utils;
 			sourceTree = "<group>";
@@ -150,6 +169,7 @@
 		EF7009121C3ED07100E75ECF /* PianoTuna */ = {
 			isa = PBXGroup;
 			children = (
+				7CCFE75A206A65220017D2AD /* wavelets */,
 				7C5F7221205F6A84003DBE84 /* ui */,
 				7C5F721E205F4444003DBE84 /* tonal */,
 				7CD8D2ED2058C9CA008F95A1 /* utils */,
@@ -240,26 +260,30 @@
 			buildActionMask = 2147483647;
 			files = (
 				7C5F7222205F70E6003DBE84 /* HistogramView.swift in Sources */,
+				7CCFE762206CF9EE0017D2AD /* Complex.swift in Sources */,
 				7C4DD48F206182CE0011AB36 /* TimedBoolean.swift in Sources */,
 				7C51A76220587324006A9E1D /* BaseTabBarController.swift in Sources */,
 				7C51A76420589194006A9E1D /* CircularArray.swift in Sources */,
 				7CBE8CAC2063347C0081D69A /* LinearRegression.swift in Sources */,
 				7CBE8CB02063499D0081D69A /* LinearRegressionBins.swift in Sources */,
 				7CCFE757206457150017D2AD /* Examples.swift in Sources */,
-				7C563011205C8561003111CF /* FFTUtils.swift in Sources */,
 				7CBE8CAE206343800081D69A /* FFTLoader.swift in Sources */,
+				7CCFE75C206B5DF50017D2AD /* Morlet.swift in Sources */,
 				7C5F7223205F70E9003DBE84 /* FFTSpectrumView.swift in Sources */,
 				7C563013205C9C38003111CF /* ScaledBandsFFT.swift in Sources */,
 				7C4DD48B205FFCA80011AB36 /* MovingAverageBins.swift in Sources */,
 				7C4DD48D206000330011AB36 /* MovingAverage.swift in Sources */,
 				7C4DD489205FF78A0011AB36 /* NoteSession.swift in Sources */,
+				7CCFE75E206B5E020017D2AD /* WaveletTransform.swift in Sources */,
 				7CD8D2EB2058B7EE008F95A1 /* PitchAnalyser.swift in Sources */,
 				EF7009161C3ED07100E75ECF /* SpectralViewController.swift in Sources */,
+				7CCFE760206BEDDB0017D2AD /* MathUtils.swift in Sources */,
 				7CCFE75520636C5E0017D2AD /* FrequencyMeasure.swift in Sources */,
 				EF70092A1C3EDFB900E75ECF /* TempiAudioInput.swift in Sources */,
 				7CCFE7592064642E0017D2AD /* MicInputExtractor.swift in Sources */,
 				7C5F7220205F45FC003DBE84 /* NoteIntervalCalculator.swift in Sources */,
 				EFAC3F481C45C719002CD63F /* TempiFFT.swift in Sources */,
+				7CCFE764206CFA190017D2AD /* ComplexOperator.swift in Sources */,
 				7C4DD487205F73F70011AB36 /* Inharmonicity.swift in Sources */,
 				7C56300D205BE839003111CF /* VerticalLayoutView.swift in Sources */,
 				EF7009141C3ED07100E75ECF /* AppDelegate.swift in Sources */,

@@ -17,7 +17,7 @@ class Inharmonicity {
         if spectrum != nil {
             for i in 1...maxHarmonics {
                 let idealFrequency = Double(i) * fundamentalFrequency
-                let peaks = FFTUtils.calculateFrequencyPeaks(spectrum: spectrum!, binWidth: fft.bandwidth, minMagnitude: minMagnitude, fromFrequency: idealFrequency*0.9, toFrequency: idealFrequency*1.1)
+                let peaks = MathUtils.calculateFrequencyPeaks(spectrum: spectrum!, binWidth: fft.bandwidth, minMagnitude: minMagnitude, fromFrequency: idealFrequency*0.9, toFrequency: idealFrequency*1.1)
                 if peaks.count==0 {
                     harmonics.append((number:i, idealFrequency:idealFrequency, measuredFrequency:0, magnitude:0, inharmonicityIndex:0))
                 } else {
