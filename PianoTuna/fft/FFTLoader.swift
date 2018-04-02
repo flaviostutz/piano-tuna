@@ -39,7 +39,7 @@ class FFTLoader {
                 })
                 let fft = TempiFFT(withSize: self.samplesSize, sampleRate: self.sampleRate)
                 fft.windowType = TempiFFTWindowType.gaussian
-                print("buffer samples \(self.lastBufferSamples.count)")
+//                print("buffer samples \(self.lastBufferSamples.count)")
                 fft.fftForward(self.lastBufferSamples)
                 forwardFrequency.tick()
 //                self.buffer.removeAll(keepingCapacity: false)

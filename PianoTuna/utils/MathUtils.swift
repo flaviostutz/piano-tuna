@@ -101,4 +101,43 @@ class MathUtils {
         return peakFreqs
     }
 
+    static func findPeaks(data: [Double], minValue: Double=0.0001) -> [(index: Int, preciseIndex: Double, value: Double)] {
+        var peaks = Array<(index: Int, preciseIndex: Double, value: Double)>()
+        var climbing: Bool = true
+        
+        if data.count<3 {
+            return peaks
+        }
+        
+        for i in 2..<data.count {
+            if climbing &&
+                data[i-1]>minValue &&
+                data[i]<data[i-1] {
+                //calculate best index diff fit between (possible) peak elements
+                //see other methods at https://dspguru.com/dsp/howtos/how-to-interpolate-fft-peak/
+                
+                let max_i = i-1
+                let s0 = data[max_i-1]
+                let s1 = data[max_i]
+                let s2 = data[max_i+1]
+                
+                //Barycentric method
+                //                let indexDiff: Double = (s2 - s0) / (s0 + s1 + s2)
+                
+                //Gaussian interpolation (err<=0.4Hz)
+                //                let indexDiff = log(s2/s0)*0.5/log(s1*s1/(s2*s0))
+                
+                //Quadratic interpolation
+                //                let indexDiff = (1/2) * ((s0-s2)/(s0 - 2*s1 + s2))
+                
+                //Parabolic interpolation
+                let indexDiff = (s2-s0)/(2*(2*s1 - s0 - s2))
+                
+                peaks.append((index:max_i, preciseIndex:Double(max_i)+indexDiff, value:s1))
+            }
+            climbing = data[i]>data[i-1]
+        }
+        return peaks
+    }
+
 }

@@ -28,7 +28,7 @@
 		7CCFE757206457150017D2AD /* Examples.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCFE756206457150017D2AD /* Examples.swift */; };
 		7CCFE7592064642E0017D2AD /* MicInputExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCFE7582064642E0017D2AD /* MicInputExtractor.swift */; };
 		7CCFE75C206B5DF50017D2AD /* Morlet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCFE75B206B5DF50017D2AD /* Morlet.swift */; };
-		7CCFE75E206B5E020017D2AD /* WaveletTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCFE75D206B5E020017D2AD /* WaveletTransform.swift */; };
+		7CCFE75E206B5E020017D2AD /* WaveletUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCFE75D206B5E020017D2AD /* WaveletUtils.swift */; };
 		7CCFE760206BEDDB0017D2AD /* MathUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCFE75F206BEDDB0017D2AD /* MathUtils.swift */; };
 		7CCFE762206CF9EE0017D2AD /* Complex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCFE761206CF9EE0017D2AD /* Complex.swift */; };
 		7CCFE764206CFA190017D2AD /* ComplexOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCFE763206CFA190017D2AD /* ComplexOperator.swift */; };
@@ -61,7 +61,7 @@
 		7CCFE756206457150017D2AD /* Examples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Examples.swift; sourceTree = "<group>"; };
 		7CCFE7582064642E0017D2AD /* MicInputExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicInputExtractor.swift; sourceTree = "<group>"; };
 		7CCFE75B206B5DF50017D2AD /* Morlet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Morlet.swift; sourceTree = "<group>"; wrapsLines = 0; };
-		7CCFE75D206B5E020017D2AD /* WaveletTransform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveletTransform.swift; sourceTree = "<group>"; wrapsLines = 0; };
+		7CCFE75D206B5E020017D2AD /* WaveletUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveletUtils.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		7CCFE75F206BEDDB0017D2AD /* MathUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathUtils.swift; sourceTree = "<group>"; wrapsLines = 0; };
 		7CCFE761206CF9EE0017D2AD /* Complex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Complex.swift; sourceTree = "<group>"; };
 		7CCFE763206CFA190017D2AD /* ComplexOperator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplexOperator.swift; sourceTree = "<group>"; };
@@ -115,7 +115,7 @@
 			isa = PBXGroup;
 			children = (
 				7CCFE75B206B5DF50017D2AD /* Morlet.swift */,
-				7CCFE75D206B5E020017D2AD /* WaveletTransform.swift */,
+				7CCFE75D206B5E020017D2AD /* WaveletUtils.swift */,
 			);
 			path = wavelets;
 			sourceTree = "<group>";
@@ -274,7 +274,7 @@
 				7C4DD48B205FFCA80011AB36 /* MovingAverageBins.swift in Sources */,
 				7C4DD48D206000330011AB36 /* MovingAverage.swift in Sources */,
 				7C4DD489205FF78A0011AB36 /* NoteSession.swift in Sources */,
-				7CCFE75E206B5E020017D2AD /* WaveletTransform.swift in Sources */,
+				7CCFE75E206B5E020017D2AD /* WaveletUtils.swift in Sources */,
 				7CD8D2EB2058B7EE008F95A1 /* PitchAnalyser.swift in Sources */,
 				EF7009161C3ED07100E75ECF /* SpectralViewController.swift in Sources */,
 				7CCFE760206BEDDB0017D2AD /* MathUtils.swift in Sources */,

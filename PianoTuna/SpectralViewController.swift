@@ -20,12 +20,12 @@ class SpectralViewController: UIViewController {
 
     //PARAMETERS
     //best frequency measurements precision: 44100@8192samples (5Hz FFT)
-    let fftSampleRate: Double = 8000//piano max frequency is 8kHz
+    let fftSampleRate: Double = 16000//piano max frequency is 8kHz
     let fftSize: Int = 2048 //2048 7.8125Hz/bin
     let fftOverlapRatio: Double = 0.0
     
     var drawTimedBoolean = TimedBoolean(time: 1000/5)
-    var waveletTimedBoolean = TimedBoolean(time: 1000)
+    var waveletTimedBoolean = TimedBoolean(time: 1000/2)
 
     var noteSession = NoteSession()
     
@@ -67,8 +67,8 @@ class SpectralViewController: UIViewController {
         self.hpsSpectrumView.barColor = UIColor.red.cgColor
         self.hpsSpectrumView.minX = 0
 //        self.hpsSpectrumView.maxX = 256
-        self.hpsSpectrumView.minY = -0.1
-        self.hpsSpectrumView.maxY = 0.1
+        self.hpsSpectrumView.minY = -0.2
+        self.hpsSpectrumView.maxY = 0.2
 //        let morlet = Morlet(sampleRate:self.fftSampleRate, size:Int(self.fftSampleRate*(3.0/30.0)))//"size of 3 samples of a 30Hz signal"
 //        self.hpsSpectrumView.data = morlet.filter(frequency: searchFrequency).map({ (v) -> Double in
 //            return v.real
@@ -140,8 +140,8 @@ class SpectralViewController: UIViewController {
             self.fftSpectrumView.zoomFromFrequency = noteSession.zoomFrequencyFrom
             self.fftSpectrumView.zoomToFrequency = noteSession.zoomFrequencyTo
             
-            self.hpsSpectrumView.annotations = []
             if noteSession.zoomedTonalPeaks != nil && noteSession.zoomedTonalPeaks!.count>0 {
+                self.hpsSpectrumView.annotations = []
                 let peak = noteSession.zoomedTonalPeaks[0]
                 let note = NoteIntervalCalculator.frequencyToNoteEqualTemperament(peak.frequency)
 //                print("detection=\(note.name) \(String(format: "%.1f", note.cents))¢ \(peak.frequency)Hz")
@@ -161,13 +161,18 @@ class SpectralViewController: UIViewController {
 //            }
 //            bgbins = MathUtils.gaussianWindow(windowSize: 100, sigma: 6)
 
-            if self.waveletTimedBoolean.checkTrue() {
-                let morlet = Morlet(sampleRate:self.fftSampleRate)
-                let signal = self.fftLoader.lastBufferSamples[...2040]
-                let convoluted = morlet.convolve(signal: Array(signal), frequency: 144.0)
-                print("\(signal.count) \(convoluted.count) \(convoluted.max()!) \(morlet.filter(frequency: 100.0).count)")
-                self.hpsSpectrumView.annotations = [(text:"\(convoluted.max()!)", x:150, y:150)]
-                self.hpsSpectrumView.data = convoluted
+            if self.waveletTimedBoolean.checkTrue() && self.fftLoader.lastBufferSamples != nil {
+                let result1 = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 178.0)
+                let result2 = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 180.0)
+                let result3 = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 182.0)
+//                let matchLevel2 = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 180.01)
+//                let matchLevel3 = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 180.02)
+//                print("\(String(format:"%.2f", result.level)) \(result.diff)")
+                self.hpsSpectrumView.annotations = []
+                self.hpsSpectrumView.annotations.append((text:"178Hz=> \(String(format:"%.1f", result1.level)) \(String(format:"%.2f", result1.diff))", x:100, y:100))
+                self.hpsSpectrumView.annotations.append((text:"180Hz=> \(String(format:"%.1f", result2.level)) \(String(format:"%.2f", result2.diff))", x:100, y:120))
+                self.hpsSpectrumView.annotations.append((text:"182Hz=> \(String(format:"%.1f", result3.level)) \(String(format:"%.2f", result3.diff))", x:100, y:140))
+                self.hpsSpectrumView.data = result2.debug
 //                print(convoluted)
             }
         }
