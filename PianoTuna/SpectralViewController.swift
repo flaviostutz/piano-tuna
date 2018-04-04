@@ -28,7 +28,7 @@ class SpectralViewController: UIViewController {
     var noteSession = NoteSession()
     
     var waveletSearches: Array<(frequency: Double, level: Double, measuredFrequency: Double, debug: [Double])>!
-    var searchAvg = MovingAverage(numberOfSamples: 8)
+    var searchAvg = MovingAverage(numberOfSamples: 12)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -98,12 +98,18 @@ class SpectralViewController: UIViewController {
 
                 //WAVELET FREQUENCY SEARCH
                 self.waveletSearches = Array<(frequency: Double, level: Double, measuredFrequency: Double, debug: [Double])>()
-//                self.waveletSearches.append(WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 439.0))
-                let s1 = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 440.0)
-                if s1 != nil {
-                    self.waveletSearches.append(s1!)
+                var s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 438.0)
+                if s != nil {
+                    self.waveletSearches.append(s!)
                 }
-//                self.waveletSearches.append(WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 442.0))
+                s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 440.0)
+                if s != nil {
+                    self.waveletSearches.append(s!)
+                }
+                s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 441.0)
+                if s != nil {
+                    self.waveletSearches.append(s!)
+                }
                 if self.waveletSearches.count>0 {
                     self.searchAvg.addSample(value: self.waveletSearches[0].measuredFrequency)
                 }
@@ -174,16 +180,16 @@ class SpectralViewController: UIViewController {
                 let wss = self.waveletSearches.sorted(by: { (elem1, elem2) -> Bool in
                     return abs(elem1.level) > abs(elem2.level)
                 })
+                let avgFreq = self.searchAvg.getAverage()
                 for ws in wss {
-                    self.hpsSpectrumView.annotations.append((text:"\(String(format:"%.2f",ws.frequency))Hz=> \(String(format:"%.1f", ws.level)) \(String(format:"%.2f", ws.measuredFrequency))", x:100, y:60+Float(c)))
+                    self.hpsSpectrumView.annotations.append((text:"\(String(format:"%.3f",ws.frequency))Hz=> \(String(format:"%.4f", ws.level)) \(String(format:"%.3f", ws.measuredFrequency)) err=\((avgFreq != nil ? "\(avgFreq!-ws.frequency)" : "-"))Hz", x:100, y:60+Float(c)))
                     if c == 0 {
                         self.hpsSpectrumView.data = ws.debug
                     }
                     c += 15
                 }
-                let freq = self.searchAvg.getAverage()
-                if freq != nil {
-                    self.hpsSpectrumView.annotations.append((text:"\(String(format:"%.4f",freq!))Hz", x:100, y:60+Float(c)))
+                if avgFreq != nil {
+                    self.hpsSpectrumView.annotations.append((text:"\(String(format:"%.4f",avgFreq!))Hz", x:100, y:60+Float(c)))
                 }
             }
         }

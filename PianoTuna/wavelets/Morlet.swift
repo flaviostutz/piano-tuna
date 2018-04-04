@@ -12,17 +12,17 @@ import Darwin
 class Morlet {
 
     var sampleRate: Double!
-    var s: Int!
+    var s: Double!
     
     //s - number of periods in wavelet
-    init(sampleRate: Double, s: Int = 6) {
+    init(sampleRate: Double, s: Double = 6) {
         self.sampleRate = sampleRate
         self.s = s
     }
     
     //https://github.com/scipy/scipy/blob/master/scipy/signal/wavelets.py
     func filter(frequency: Double) -> [Double] {
-        let size = Int(self.sampleRate/frequency)*self.s
+        let size = Int(round((self.sampleRate/frequency)*self.s))
         //f = 2*s*w*r / M`` where `r` sampling rate; s Scaling factor, windowed from ``-s*2*pi`` to ``+s*2*pi``. Default is 1; w Omega0. Default is 5; M Length of the wavelet
         let w = 2.0 * Double.pi * frequency
         let gaussianWindow = MathUtils.gaussianWindow(windowSize: size, sigma: 6.0)

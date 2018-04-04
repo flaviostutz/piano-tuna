@@ -133,10 +133,10 @@ class MathUtils {
                 //                let indexDiff = log(s2/s0)*0.5/log(s1*s1/(s2*s0))
                 
                 //Quadratic interpolation
-                //                let indexDiff = (1/2) * ((s0-s2)/(s0 - 2*s1 + s2))
+                let indexDiff = (1/2) * ((s0-s2)/(s0 - 2*s1 + s2))
                 
                 //Parabolic interpolation
-                let indexDiff = (s2-s0)/(2*(2*s1 - s0 - s2))
+//                let indexDiff = (s2-s0)/(2*(2*s1 - s0 - s2))
                 
                 peaks.append((index:max_i, preciseIndex:Double(max_i)+indexDiff, value:s1))
             }
