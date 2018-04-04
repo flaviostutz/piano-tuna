@@ -25,9 +25,10 @@ class SpectralViewController: UIViewController {
     let fftOverlapRatio: Double = 0.0
     
     var drawTimedBoolean = TimedBoolean(time: 1000/5)
-    var waveletTimedBoolean = TimedBoolean(time: 1000/2)
-
     var noteSession = NoteSession()
+    
+    var waveletSearches: Array<(frequency: Double, level: Double, measuredFrequency: Double, debug: [Double])>!
+    var searchAvg = MovingAverage(numberOfSamples: 8)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -67,12 +68,10 @@ class SpectralViewController: UIViewController {
         self.hpsSpectrumView.barColor = UIColor.red.cgColor
         self.hpsSpectrumView.minX = 0
 //        self.hpsSpectrumView.maxX = 256
-        self.hpsSpectrumView.minY = -0.2
-        self.hpsSpectrumView.maxY = 0.2
-//        let morlet = Morlet(sampleRate:self.fftSampleRate, size:Int(self.fftSampleRate*(3.0/30.0)))//"size of 3 samples of a 30Hz signal"
-//        self.hpsSpectrumView.data = morlet.filter(frequency: searchFrequency).map({ (v) -> Double in
-//            return v.real
-//        })
+        self.hpsSpectrumView.minY = 0.0
+//        self.hpsSpectrumView.maxY = 0.2
+
+        
         
         //prepare main vertical layout
         let verticalLayout = VerticalLayoutView(width:view.bounds.width)
@@ -83,7 +82,6 @@ class SpectralViewController: UIViewController {
         //initialize sound analysis
 //        var circularSamplesBuffer = CircularArray<Double>()
         self.drawTimedBoolean.reset()
-        self.waveletTimedBoolean.reset()
         
         self.fftLoader = FFTLoader(sampleRate: self.fftSampleRate, samplesSize: fftSize, overlapRatio: fftOverlapRatio)
         
@@ -91,9 +89,24 @@ class SpectralViewController: UIViewController {
             let signalSamples = samples.map({ (element) -> Double in
                 return Double(element)
             })
+            
             let fft = self.fftLoader.addSamples(samples: signalSamples)
             if fft != nil {
+                
+                //NOTE SESSION
                 self.noteSession.step(fft: fft!)
+
+                //WAVELET FREQUENCY SEARCH
+                self.waveletSearches = Array<(frequency: Double, level: Double, measuredFrequency: Double, debug: [Double])>()
+//                self.waveletSearches.append(WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 439.0))
+                let s1 = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 440.0)
+                if s1 != nil {
+                    self.waveletSearches.append(s1!)
+                }
+//                self.waveletSearches.append(WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 442.0))
+                if self.waveletSearches.count>0 {
+                    self.searchAvg.addSample(value: self.waveletSearches[0].measuredFrequency)
+                }
             }
 
             if self.drawTimedBoolean.checkTrue() {
@@ -140,8 +153,9 @@ class SpectralViewController: UIViewController {
             self.fftSpectrumView.zoomFromFrequency = noteSession.zoomFrequencyFrom
             self.fftSpectrumView.zoomToFrequency = noteSession.zoomFrequencyTo
             
+            self.hpsSpectrumView.annotations = Array<(text:String, x:Float, y:Float)>()
+            
             if noteSession.zoomedTonalPeaks != nil && noteSession.zoomedTonalPeaks!.count>0 {
-                self.hpsSpectrumView.annotations = []
                 let peak = noteSession.zoomedTonalPeaks[0]
                 let note = NoteIntervalCalculator.frequencyToNoteEqualTemperament(peak.frequency)
 //                print("detection=\(note.name) \(String(format: "%.1f", note.cents))¢ \(peak.frequency)Hz")
@@ -155,25 +169,22 @@ class SpectralViewController: UIViewController {
             }
             self.fftSpectrumView.fft = noteSession.fft
 
-//            var bgbins: [Double]!
-//            if noteSession.backgroundNoise != nil {
-//                bgbins = noteSession.backgroundNoise.getResult()
-//            }
-//            bgbins = MathUtils.gaussianWindow(windowSize: 100, sigma: 6)
-
-            if self.waveletTimedBoolean.checkTrue() && self.fftLoader.lastBufferSamples != nil {
-                let result1 = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 178.0)
-                let result2 = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 180.0)
-                let result3 = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 182.0)
-//                let matchLevel2 = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 180.01)
-//                let matchLevel3 = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 180.02)
-//                print("\(String(format:"%.2f", result.level)) \(result.diff)")
-                self.hpsSpectrumView.annotations = []
-                self.hpsSpectrumView.annotations.append((text:"178Hz=> \(String(format:"%.1f", result1.level)) \(String(format:"%.2f", result1.diff))", x:100, y:100))
-                self.hpsSpectrumView.annotations.append((text:"180Hz=> \(String(format:"%.1f", result2.level)) \(String(format:"%.2f", result2.diff))", x:100, y:120))
-                self.hpsSpectrumView.annotations.append((text:"182Hz=> \(String(format:"%.1f", result3.level)) \(String(format:"%.2f", result3.diff))", x:100, y:140))
-                self.hpsSpectrumView.data = result2.debug
-//                print(convoluted)
+            if self.waveletSearches != nil {
+                var c = 0
+                let wss = self.waveletSearches.sorted(by: { (elem1, elem2) -> Bool in
+                    return abs(elem1.level) > abs(elem2.level)
+                })
+                for ws in wss {
+                    self.hpsSpectrumView.annotations.append((text:"\(String(format:"%.2f",ws.frequency))Hz=> \(String(format:"%.1f", ws.level)) \(String(format:"%.2f", ws.measuredFrequency))", x:100, y:60+Float(c)))
+                    if c == 0 {
+                        self.hpsSpectrumView.data = ws.debug
+                    }
+                    c += 15
+                }
+                let freq = self.searchAvg.getAverage()
+                if freq != nil {
+                    self.hpsSpectrumView.annotations.append((text:"\(String(format:"%.4f",freq!))Hz", x:100, y:60+Float(c)))
+                }
             }
         }
     }

@@ -72,7 +72,7 @@ class NoteSession {
         } else if phase == NoteSessionPhase.backgroundNoise {
             
             //high change detected. may be an attack
-            if ((sumMag-overallMagnitude.getAverage()))>5 && timeInPhase()>10 {
+            if ((sumMag-overallMagnitude.getAverage()))>0.2 && timeInPhase()>10 {
                 
                 let peakFundamentalFreqs = detectBestFundamentalPeaks(fft: fft)
 

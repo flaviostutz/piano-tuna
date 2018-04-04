@@ -10,6 +10,11 @@ import Foundation
 
 class MathUtils {
     
+    static func remaining(value: Double, divisor: Double) -> Double {
+        let di = Int(value)/Int(divisor)
+        return value - Double(di)*divisor
+    }
+    
     //returns a ratio from -1 to 1 on how near are the values
     //valuesNearRatio(5, 10, 20) returns 0.75 because their diff is 25% of 20
     //valuesNearRatio(0, 0.1, 1) returns 0.1 because their diff is 90% of 1
