@@ -11,11 +11,11 @@ import Foundation
 //This is the entrypoint for FFT analysis for input buffer accumulation and other tools over the resulting FFT matrix, like averaging and linear regression for better stability
 class FFTLoader {
     
-    private var buffer: CircularArray<Double>!
+    var buffer: CircularArray<Double>!
     
-    private var samplesSize: Int!
-    private var sampleRate: Double!
-    private var overlapRatio: Double!
+    var samplesSize: Int!
+    var sampleRate: Double!
+    var overlapRatio: Double!
     private var processedSamplesCount: Int = 0
     var lastBufferSamples: [Double]!
     

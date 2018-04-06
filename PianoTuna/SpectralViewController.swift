@@ -16,6 +16,8 @@ class SpectralViewController: UIViewController {
     var hpsSpectrumView: HistogramView!
     var fftLoader: FFTLoader!
     
+    var beatingDetector: BeatingDetector!
+
     let uiFps = FrequencyMeasure()
 
     //PARAMETERS
@@ -28,6 +30,7 @@ class SpectralViewController: UIViewController {
     var noteSession = NoteSession()
     
     var waveletSearches: Array<(frequency: Double, level: Double, measuredFrequency: Double, debug: [Double])>!
+    var beatingsSearch: TempiFFT!
     var searchAvg = MovingAverage(numberOfSamples: 12)
     
     override func viewDidLoad() {
@@ -67,9 +70,9 @@ class SpectralViewController: UIViewController {
         self.hpsSpectrumView.backgroundColor = UIColor.black
         self.hpsSpectrumView.barColor = UIColor.red.cgColor
         self.hpsSpectrumView.minX = 0
-//        self.hpsSpectrumView.maxX = 256
+//        self.hpsSpectrumView.maxX = 512
         self.hpsSpectrumView.minY = 0.0
-//        self.hpsSpectrumView.maxY = 0.2
+//        self.hpsSpectrumView.maxY = 50
 
         
         
@@ -84,6 +87,8 @@ class SpectralViewController: UIViewController {
         self.drawTimedBoolean.reset()
         
         self.fftLoader = FFTLoader(sampleRate: self.fftSampleRate, samplesSize: fftSize, overlapRatio: fftOverlapRatio)
+
+        self.beatingDetector = BeatingDetector(baseFrequency: 440.0, signalSampleRate: self.fftSampleRate, fftSize: 256)
         
         let audioInputCallback: TempiAudioInputCallback = { (timeStamp, numberOfFrames, samples) -> Void in
             let signalSamples = samples.map({ (element) -> Double in
@@ -97,22 +102,29 @@ class SpectralViewController: UIViewController {
                 self.noteSession.step(fft: fft!)
 
                 //WAVELET FREQUENCY SEARCH
-                self.waveletSearches = Array<(frequency: Double, level: Double, measuredFrequency: Double, debug: [Double])>()
-                var s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 438.0)
-                if s != nil {
-                    self.waveletSearches.append(s!)
-                }
-                s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 440.0)
-                if s != nil {
-                    self.waveletSearches.append(s!)
-                }
-                s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 441.0)
-                if s != nil {
-                    self.waveletSearches.append(s!)
-                }
-                if self.waveletSearches.count>0 {
-                    self.searchAvg.addSample(value: self.waveletSearches[0].measuredFrequency)
-                }
+//                self.waveletSearches = Array<(frequency: Double, level: Double, measuredFrequency: Double, debug: [Double])>()
+//                var s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 438.0)
+//                if s != nil {
+//                    self.waveletSearches.append(s!)
+//                }
+//                s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 440.0)
+//                if s != nil {
+//                    self.waveletSearches.append(s!)
+//                }
+//                s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 441.0)
+//                if s != nil {
+//                    self.waveletSearches.append(s!)
+//                }
+//                if self.waveletSearches.count>0 {
+//                    self.searchAvg.addSample(value: self.waveletSearches[0].measuredFrequency)
+//                }
+            }
+            
+            //FREQUENCY BEATINGS DETECTION
+            //                self.beatingsSearch = WaveletUtils.beatFrequenciesDetection(baseFrequency: 440.0, signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate)
+            let br = self.beatingDetector.addSamples(samples: signalSamples)
+            if br != nil {
+                self.beatingsSearch = br
             }
 
             if self.drawTimedBoolean.checkTrue() {
@@ -124,6 +136,7 @@ class SpectralViewController: UIViewController {
         audioInput.startRecording()
     }
 
+    
     func updateUI(noteSession: NoteSession) {
         
         DispatchQueue.main.async {
@@ -175,8 +188,8 @@ class SpectralViewController: UIViewController {
             }
             self.fftSpectrumView.fft = noteSession.fft
 
+            var c = 0
             if self.waveletSearches != nil {
-                var c = 0
                 let wss = self.waveletSearches.sorted(by: { (elem1, elem2) -> Bool in
                     return abs(elem1.level) > abs(elem2.level)
                 })
@@ -184,13 +197,27 @@ class SpectralViewController: UIViewController {
                 for ws in wss {
                     self.hpsSpectrumView.annotations.append((text:"\(String(format:"%.3f",ws.frequency))Hz=> \(String(format:"%.4f", ws.level)) \(String(format:"%.3f", ws.measuredFrequency)) err=\((avgFreq != nil ? "\(avgFreq!-ws.frequency)" : "-"))Hz", x:100, y:60+Float(c)))
                     if c == 0 {
-                        self.hpsSpectrumView.data = ws.debug
+//                        self.hpsSpectrumView.data = ws.debug
                     }
                     c += 15
                 }
                 if avgFreq != nil {
                     self.hpsSpectrumView.annotations.append((text:"\(String(format:"%.4f",avgFreq!))Hz", x:100, y:60+Float(c)))
+                    c += 15
                 }
+            }
+            
+            if self.beatingsSearch != nil {
+                self.hpsSpectrumView.data = self.beatingsSearch.spectrum()
+//                self.hpsSpectrumView.data = self.beatingDetector.fftLoader.buffer.map({ (elem) -> Double in
+//                    return elem
+//                })
+//                print(self.beatingsSearch.spectrum())
+//                for bs in self.beatingsSearch {
+//                    self.hpsSpectrumView.annotations.append((text:"BEATINGS \(String(format:"%.3f",bs.measuredFrequency))Hz \(String(format:"%.4f", bs.level))", x:100, y:60+Float(c)))
+//                    c += 15
+//                    self.hpsSpectrumView.data = bs.debug
+//                }
             }
         }
     }
