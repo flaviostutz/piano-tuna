@@ -13,11 +13,14 @@ class SpectralViewController: UIViewController {
     
     var audioInput: TempiAudioInput!
     var fftSpectrumView: FFTSpectrumView!
-    var hpsSpectrumView: HistogramView!
+    var spectrumView1: HistogramView!
+    var spectrumView2: HistogramView!
     var fftLoader: FFTLoader!
     
     var beatingDetector: BeatingDetector!
-
+    var beatingDetectorDebug1: Array<Double>!
+    var beatingDetectorDebug2: Array<Double>!
+    
     let uiFps = FrequencyMeasure()
 
     //PARAMETERS
@@ -30,7 +33,8 @@ class SpectralViewController: UIViewController {
     var noteSession = NoteSession()
     
     var waveletSearches: Array<(frequency: Double, level: Double, measuredFrequency: Double, debug: [Double])>!
-    var beatingsSearch: TempiFFT!
+    var beatingsFFT: TempiFFT!
+//    var beatingsResult: Array<(level: Double, measuredFrequency: Double, debug: [Double])>!
     var searchAvg = MovingAverage(numberOfSamples: 12)
     
     override func viewDidLoad() {
@@ -56,7 +60,7 @@ class SpectralViewController: UIViewController {
 
         
         //draw fft spectrum
-        self.fftSpectrumView = FFTSpectrumView(frame: CGRect(x:0,y:0,width:self.view.bounds.width,height:self.view.bounds.height/2-20))
+        self.fftSpectrumView = FFTSpectrumView(frame: CGRect(x:0,y:0,width:self.view.bounds.width,height:self.view.bounds.height/3-20))
         self.fftSpectrumView.backgroundColor = UIColor.black
         self.fftSpectrumView.title = "Raw spectrum"
 //        self.fftSpectrumView.zoomMinDB =
@@ -64,22 +68,36 @@ class SpectralViewController: UIViewController {
         self.fftSpectrumView.zoomFromFrequency = 0
         self.fftSpectrumView.zoomToFrequency = 2000
         
-        
-        //draw hps spectrum
-        self.hpsSpectrumView = HistogramView(frame: CGRect(x:0,y:0,width:self.view.bounds.width,height:self.view.bounds.height/2-20))
-        self.hpsSpectrumView.backgroundColor = UIColor.black
-        self.hpsSpectrumView.barColor = UIColor.red.cgColor
-        self.hpsSpectrumView.minX = 0
-//        self.hpsSpectrumView.maxX = 512
-        self.hpsSpectrumView.minY = 0.0
-//        self.hpsSpectrumView.maxY = 50
 
         
+        
+        //draw spectrum view 1
+        self.spectrumView1 = HistogramView(frame: CGRect(x:0,y:0,width:self.view.bounds.width,height:self.view.bounds.height/3-20))
+        self.spectrumView1.backgroundColor = UIColor.black
+        self.spectrumView1.barColor = UIColor.red.cgColor
+//        self.spectrumView1.minX = 0
+//        self.spectrumView1.maxX = 512
+//        self.spectrumView1.minY = 0.0
+//        self.spectrumView1.maxY = 50
+        
+        
+        
+        //draw hps spectrum
+        self.spectrumView2 = HistogramView(frame: CGRect(x:0,y:0,width:self.view.bounds.width,height:self.view.bounds.height/3-20))
+        self.spectrumView2.backgroundColor = UIColor.black
+        self.spectrumView2.barColor = UIColor.red.cgColor
+        self.spectrumView2.minX = 0
+        //        self.spectrumView2.maxX = 512
+        self.spectrumView2.minY = 0.0
+        self.spectrumView2.maxY = 30
+        
+
         
         //prepare main vertical layout
         let verticalLayout = VerticalLayoutView(width:view.bounds.width)
         verticalLayout.addSubview(fftSpectrumView)
-        verticalLayout.addSubview(hpsSpectrumView)
+        verticalLayout.addSubview(spectrumView1)
+        verticalLayout.addSubview(spectrumView2)
         self.view.addSubview(verticalLayout)
         
         //initialize sound analysis
@@ -121,10 +139,31 @@ class SpectralViewController: UIViewController {
             }
             
             //FREQUENCY BEATINGS DETECTION
-            //                self.beatingsSearch = WaveletUtils.beatFrequenciesDetection(baseFrequency: 440.0, signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate)
-            let br = self.beatingDetector.addSamples(samples: signalSamples)
-            if br != nil {
-                self.beatingsSearch = br
+            if self.fftLoader.lastBufferSamples != nil {
+//                self.beatingsResult = WaveletUtils.beatFrequenciesDetection(baseFrequency: 440.0, signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate)
+                let br = self.beatingDetector.addSamples(samples: signalSamples)
+                if br != nil {
+                    self.beatingsFFT = br
+                }
+                
+                //for debuging
+//                if self.beatingDetector.lastConvoluted != nil {
+//                    self.beatingDetectorDebug1 = self.beatingDetector.lastConvoluted.map({ (elem) -> Double in
+//                        return elem
+//                    })
+//                }
+                self.beatingDetectorDebug1 = self.beatingDetector.fftLoader.buffer.map({ (elem) -> Double in
+                    return elem
+                })
+//                if self.beatingDetector.lastPeaks != nil {
+//                    self.beatingDetectorDebug2 = self.beatingDetector.lastPeaks.map({ (elem) -> Double in
+//                        return elem
+//                    })
+//                }
+                if self.beatingsFFT != nil {
+                    self.beatingDetectorDebug2 = self.beatingsFFT.spectrum()
+                }
+
             }
 
             if self.drawTimedBoolean.checkTrue() {
@@ -172,18 +211,21 @@ class SpectralViewController: UIViewController {
             self.fftSpectrumView.zoomFromFrequency = noteSession.zoomFrequencyFrom
             self.fftSpectrumView.zoomToFrequency = noteSession.zoomFrequencyTo
             
-            self.hpsSpectrumView.annotations = Array<(text:String, x:Float, y:Float)>()
-            
+            self.spectrumView1.annotations = Array<(text:String, x:Float, y:Float)>()
+            self.spectrumView2.annotations = Array<(text:String, x:Float, y:Float)>()
+
             if noteSession.zoomedTonalPeaks != nil && noteSession.zoomedTonalPeaks!.count>0 {
                 let peak = noteSession.zoomedTonalPeaks[0]
                 let note = NoteIntervalCalculator.frequencyToNoteEqualTemperament(peak.frequency)
 //                print("detection=\(note.name) \(String(format: "%.1f", note.cents))¢ \(peak.frequency)Hz")
-                self.hpsSpectrumView.annotations.append((text:"\(note.name) \(String(format: "%.1f", note.cents))¢", x:100, y:100))
+                self.spectrumView2.annotations.append((text:"\(note.name) \(String(format: "%.1f", note.cents))¢", x:100, y:100))
     
                 let harmonics = Inharmonicity.calculateInharmonicity(fft: noteSession.fft, fundamentalFrequency: peak.frequency)
                 for i in 0..<harmonics.count {
                     let harm = harmonics[i]
-                    self.hpsSpectrumView.annotations.append((text:"\(harm.number): \(harm.idealFrequency) (\(harm.measuredFrequency)) \(String(format:"%.2f", harm.inharmonicityIndex*100))%", x: 300, y: Float(20+(i*20))))
+                    if harm.measuredFrequency>0 {
+                        self.spectrumView2.annotations.append((text:"\(harm.number): \(harm.idealFrequency) (\(harm.measuredFrequency)) \(String(format:"%.2f", harm.inharmonicityIndex*100))%", x: 300, y: Float(20+(i*20))))
+                    }
                 }
             }
             self.fftSpectrumView.fft = noteSession.fft
@@ -195,28 +237,29 @@ class SpectralViewController: UIViewController {
                 })
                 let avgFreq = self.searchAvg.getAverage()
                 for ws in wss {
-                    self.hpsSpectrumView.annotations.append((text:"\(String(format:"%.3f",ws.frequency))Hz=> \(String(format:"%.4f", ws.level)) \(String(format:"%.3f", ws.measuredFrequency)) err=\((avgFreq != nil ? "\(avgFreq!-ws.frequency)" : "-"))Hz", x:100, y:60+Float(c)))
+                    self.spectrumView2.annotations.append((text:"\(String(format:"%.3f",ws.frequency))Hz=> \(String(format:"%.4f", ws.level)) \(String(format:"%.3f", ws.measuredFrequency)) err=\((avgFreq != nil ? "\(avgFreq!-ws.frequency)" : "-"))Hz", x:100, y:60+Float(c)))
                     if c == 0 {
-//                        self.hpsSpectrumView.data = ws.debug
+//                        self.spectrumView2.data = ws.debug
                     }
                     c += 15
                 }
                 if avgFreq != nil {
-                    self.hpsSpectrumView.annotations.append((text:"\(String(format:"%.4f",avgFreq!))Hz", x:100, y:60+Float(c)))
+                    self.spectrumView2.annotations.append((text:"\(String(format:"%.4f",avgFreq!))Hz", x:100, y:60+Float(c)))
                     c += 15
                 }
             }
             
-            if self.beatingsSearch != nil {
-                self.hpsSpectrumView.data = self.beatingsSearch.spectrum()
-//                self.hpsSpectrumView.data = self.beatingDetector.fftLoader.buffer.map({ (elem) -> Double in
-//                    return elem
-//                })
+            if self.beatingsFFT != nil {
+                self.spectrumView1.data = self.beatingDetectorDebug1
 //                print(self.beatingsSearch.spectrum())
-//                for bs in self.beatingsSearch {
-//                    self.hpsSpectrumView.annotations.append((text:"BEATINGS \(String(format:"%.3f",bs.measuredFrequency))Hz \(String(format:"%.4f", bs.level))", x:100, y:60+Float(c)))
+
+                self.spectrumView2.data = self.beatingDetectorDebug2
+//                self.spectrumView2.data = self.beatingsFFT.magnitudes
+
+//                for bs in self.beatingsResult {
+//                    self.spectrumView2.annotations.append((text:"BEATINGS \(String(format:"%.3f",bs.measuredFrequency))Hz \(String(format:"%.4f", bs.level))", x:100, y:60+Float(c)))
 //                    c += 15
-//                    self.hpsSpectrumView.data = bs.debug
+//                    self.spectrumView2.data = bs.debug
 //                }
             }
         }
