@@ -89,7 +89,7 @@ class SpectralViewController: UIViewController {
         self.spectrumView2.minX = 0
         //        self.spectrumView2.maxX = 512
         self.spectrumView2.minY = 0.0
-        self.spectrumView2.maxY = 30
+//        self.spectrumView2.maxY = 30
         
 
         
@@ -120,22 +120,22 @@ class SpectralViewController: UIViewController {
                 self.noteSession.step(fft: fft!)
 
                 //WAVELET FREQUENCY SEARCH
-//                self.waveletSearches = Array<(frequency: Double, level: Double, measuredFrequency: Double, debug: [Double])>()
-//                var s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 438.0)
-//                if s != nil {
-//                    self.waveletSearches.append(s!)
-//                }
-//                s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 440.0)
-//                if s != nil {
-//                    self.waveletSearches.append(s!)
-//                }
-//                s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 441.0)
-//                if s != nil {
-//                    self.waveletSearches.append(s!)
-//                }
-//                if self.waveletSearches.count>0 {
-//                    self.searchAvg.addSample(value: self.waveletSearches[0].measuredFrequency)
-//                }
+                self.waveletSearches = Array<(frequency: Double, level: Double, measuredFrequency: Double, debug: [Double])>()
+                var s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 438.0)
+                if s != nil {
+                    self.waveletSearches.append(s!)
+                }
+                s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 440.0)
+                if s != nil {
+                    self.waveletSearches.append(s!)
+                }
+                s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 441.0)
+                if s != nil {
+                    self.waveletSearches.append(s!)
+                }
+                if self.waveletSearches.count>0 {
+                    self.searchAvg.addSample(value: self.waveletSearches[0].measuredFrequency)
+                }
             }
             
             //FREQUENCY BEATINGS DETECTION

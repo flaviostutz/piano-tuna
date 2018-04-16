@@ -20,17 +20,14 @@ class BeatingDetector {
     var useEach: Int!
     var useCount: Int = 0
     
-    var averager: MovingAverage!
-    
     var buffer: CircularArray<Double>!
     
-    init(baseFrequency: Double, signalSampleRate: Double, fftSize: Int, fftOverlapRatio: Double = 0.3) {
+    init(baseFrequency: Double, signalSampleRate: Double, fftSize: Int, fftOverlapRatio: Double = 0.0) {
         self.signalSampleRate = signalSampleRate
         self.baseFrequency = baseFrequency
         let convolutedSampleRate = 128.0
         self.useEach = Int((self.signalSampleRate/WaveletUtils.wavelength(frequency: self.baseFrequency, sampleRate: self.signalSampleRate))/convolutedSampleRate)
         self.fftLoader = FFTLoader(sampleRate: convolutedSampleRate, samplesSize: fftSize, overlapRatio: fftOverlapRatio)
-        self.averager = MovingAverage(numberOfSamples: 1)
         self.buffer = CircularArray<Double>()
     }
     
@@ -63,11 +60,7 @@ class BeatingDetector {
                             useCount += 1
                             //downsampling
                             if useCount%useEach == 0 {
-                                self.averager.addSample(value: lastPeak)
-                                let avg = self.averager.getAverage()
-                                if avg != nil {
-                                    peaks.append(avg!)
-                                }
+                                peaks.append(lastPeak)
                             }
                             lastPeak = 0.0
                         }
