@@ -119,9 +119,9 @@ import Accelerate
                 
                 switch self.windowType {
                 case .hamming:
-                    vDSP_hamm_windowD(&self.window!, UInt(size), 0)
+                    vDSP_hamm_windowD(&self.window[0], UInt(size), 0)
                 case .hanning:
-                    vDSP_hann_windowD(&self.window!, UInt(size), Int32(vDSP_HANN_NORM))
+                    vDSP_hann_windowD(&self.window[0], UInt(size), Int32(vDSP_HANN_NORM))
                 case .gaussian:
                     self.window = MathUtils.gaussianWindow(windowSize: size, sigma: 4)
                 default:
@@ -166,7 +166,7 @@ import Accelerate
         
         // Store and square (for better visualization & conversion to db) the magnitudes
         self.magnitudes = [Double](repeating: 0.0, count: self.halfSize)
-        vDSP_zvmagsD(&(self.complexBuffer!), 1, &self.magnitudes!, 1, UInt(self.halfSize))
+        vDSP_zvmagsD(&(self.complexBuffer!), 1, &self.magnitudes[0], 1, UInt(self.halfSize))
         
         //put in natural log scale
         if useLogScale {

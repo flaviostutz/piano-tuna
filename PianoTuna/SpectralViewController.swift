@@ -20,11 +20,13 @@ class SpectralViewController: UIViewController {
     var beatingDetector: BeatingDetector!
     var beatingDetectorDebug1: Array<Double>!
     var beatingDetectorDebug2: Array<Double>!
+    var beatingPeaks: [(frequency:Double, magnitude: Double)]!
     
     let uiFps = FrequencyMeasure()
 
     //PARAMETERS
-    //best frequency measurements precision: 44100@8192samples (5Hz FFT)
+    //best frequency measurements precision direct fft: 44100@8192samples (5Hz FFT)
+    //best frequency measurements precision 0.03Hz wavelets: 16000@2048
     let fftSampleRate: Double = 16000//piano max frequency is 8kHz
     let fftSize: Int = 2048 //2048 7.8125Hz/bin
     let fftOverlapRatio: Double = 0.0
@@ -121,15 +123,15 @@ class SpectralViewController: UIViewController {
 
                 //WAVELET FREQUENCY SEARCH
                 self.waveletSearches = Array<(frequency: Double, level: Double, measuredFrequency: Double, debug: [Double])>()
-                var s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 438.0)
+                var s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 440.0)
                 if s != nil {
                     self.waveletSearches.append(s!)
                 }
-                s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 440.0)
+                s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 442.0)
                 if s != nil {
                     self.waveletSearches.append(s!)
                 }
-                s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 441.0)
+                s = WaveletUtils.frequencyMatchLevel(signal: self.fftLoader.lastBufferSamples, sampleRate: self.fftSampleRate, frequency: 444.0)
                 if s != nil {
                     self.waveletSearches.append(s!)
                 }
@@ -162,8 +164,14 @@ class SpectralViewController: UIViewController {
 //                }
                 if self.beatingsFFT != nil {
                     self.beatingDetectorDebug2 = self.beatingsFFT.spectrum()
-                }
+                    self.beatingDetectorDebug2[0] = 0
 
+                    self.beatingPeaks = MathUtils.calculateFrequencyPeaks(spectrum: self.beatingsFFT.spectrum()!, binWidth: self.beatingsFFT.bandwidth)
+                    self.beatingPeaks.sort(by: { (elem1, elem2) -> Bool in
+                        return elem1.magnitude<elem2.magnitude
+                    })
+                }
+                
             }
 
             if self.drawTimedBoolean.checkTrue() {
@@ -218,7 +226,7 @@ class SpectralViewController: UIViewController {
                 let peak = noteSession.zoomedTonalPeaks[0]
                 let note = NoteIntervalCalculator.frequencyToNoteEqualTemperament(peak.frequency)
 //                print("detection=\(note.name) \(String(format: "%.1f", note.cents))¢ \(peak.frequency)Hz")
-                self.spectrumView2.annotations.append((text:"\(note.name) \(String(format: "%.1f", note.cents))¢", x:100, y:100))
+                self.spectrumView2.annotations.append((text:"\(note.name) \(String(format: "%.1f", note.cents))¢", x:100, y:10))
     
                 let harmonics = Inharmonicity.calculateInharmonicity(fft: noteSession.fft, fundamentalFrequency: peak.frequency)
                 for i in 0..<harmonics.count {
@@ -232,35 +240,47 @@ class SpectralViewController: UIViewController {
 
             var c = 0
             if self.waveletSearches != nil {
+                let avgFreq = self.searchAvg.getAverage()
+                
                 let wss = self.waveletSearches.sorted(by: { (elem1, elem2) -> Bool in
                     return abs(elem1.level) > abs(elem2.level)
                 })
-                let avgFreq = self.searchAvg.getAverage()
-                for ws in wss {
-                    self.spectrumView2.annotations.append((text:"\(String(format:"%.3f",ws.frequency))Hz=> \(String(format:"%.4f", ws.level)) \(String(format:"%.3f", ws.measuredFrequency)) err=\((avgFreq != nil ? "\(avgFreq!-ws.frequency)" : "-"))Hz", x:100, y:60+Float(c)))
-                    if c == 0 {
-//                        self.spectrumView2.data = ws.debug
-                    }
-                    c += 15
-                }
+//                for ws in wss {
+//                    self.spectrumView2.annotations.append((text:"\(String(format:"%.3f",ws.frequency))Hz=> \(String(format:"%.4f", ws.level)) \(String(format:"%.3f", ws.measuredFrequency)) err=\((avgFreq != nil ? "\(avgFreq!-ws.frequency)" : "-"))Hz", x:100, y:60+Float(c)))
+//                    if c == 0 {
+////                        self.spectrumView2.data = ws.debug
+//                    }
+//                    c += 15
+//                }
                 if avgFreq != nil {
                     self.spectrumView2.annotations.append((text:"\(String(format:"%.4f",avgFreq!))Hz", x:100, y:60+Float(c)))
                     c += 15
+                    
+                    if self.beatingsFFT != nil {
+                        self.spectrumView1.data = self.beatingDetectorDebug1
+                        self.spectrumView2.data = self.beatingDetectorDebug2
+                        //                self.spectrumView2.data = self.beatingsFFT.magnitudes
+
+                        self.spectrumView2.annotations.append((text: "#", x: 250, y: 30))
+                        self.spectrumView2.annotations.append((text: "\(String(format:"%.2f", avgFreq!))Hz", x: 140, y: 45))
+
+                        if self.beatingPeaks != nil {
+                            var i = 1
+                            for peak in self.beatingPeaks {
+                                self.spectrumView2.annotations.append((text: ">> \(String(format:"%.2f", avgFreq! + peak.frequency))Hz", x: 100, y: 60 + Float(c)))
+                                self.spectrumView2.annotations.append((text: "\(i)", x: 250.0 + Float(peak.frequency*5), y: 30))
+                                self.spectrumView2.annotations.append((text: "\(i)", x: 250.0 - Float(peak.frequency*5), y: 30))
+                                c = c + 15
+                                i += 1
+                                if i>2 {
+                                    break
+                                }
+                            }
+                        }
+                        
+                    }
+
                 }
-            }
-            
-            if self.beatingsFFT != nil {
-                self.spectrumView1.data = self.beatingDetectorDebug1
-//                print(self.beatingsSearch.spectrum())
-
-                self.spectrumView2.data = self.beatingDetectorDebug2
-//                self.spectrumView2.data = self.beatingsFFT.magnitudes
-
-//                for bs in self.beatingsResult {
-//                    self.spectrumView2.annotations.append((text:"BEATINGS \(String(format:"%.3f",bs.measuredFrequency))Hz \(String(format:"%.4f", bs.level))", x:100, y:60+Float(c)))
-//                    c += 15
-//                    self.spectrumView2.data = bs.debug
-//                }
             }
         }
     }
